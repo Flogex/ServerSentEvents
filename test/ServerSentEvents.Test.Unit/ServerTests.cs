@@ -58,10 +58,24 @@ namespace ServerSentEvents.Test.Unit
             {
                 var httpResponse = new FakeHttpResponse();
                 var clientId = await _sut.AddClient(httpResponse);
-                await _sut.SendMessage(clientId, "Hello World");
+                var @event = new Event("Hello World");
+
+                await _sut.SendMessage(clientId, @event);
 
                 var body = await httpResponse.Body.ReadFromStart();
                 body.Should().Be("data: Hello World\n\n");
+            }
+
+            [Fact]
+            public async Task IfEventHasType_TypeShouldAppearInHttpResponseBody()
+            {
+                var httpResponse = new FakeHttpResponse();
+                var clientId = await _sut.AddClient(httpResponse);
+                var @event = new Event("sampleType", "sampleData");
+                await _sut.SendMessage(clientId, @event);
+
+                var body = await httpResponse.Body.ReadFromStart();
+                body.Should().Be("event: sampleType\ndata: sampleData\n\n");
             }
         }
 

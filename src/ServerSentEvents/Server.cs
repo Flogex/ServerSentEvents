@@ -23,14 +23,21 @@ namespace ServerSentEvents
             return id;
         }
 
-        public async Task SendMessage(ClientId id, string message)
+        public async Task SendMessage(ClientId id, Event @event)
         {
             if (!_clients.TryGetValue(id, out var client))
                 throw new ArgumentException($"Unknown client with id {id}.");
 
-            await client.WriteAsync("data: ", Encoding.UTF8);
-            await client.WriteAsync(message, Encoding.UTF8);
-            await client.WriteAsync("\n\n", Encoding.UTF8);
+            if (@event.Type != null)
+            {
+                await client.WriteAsync("event: ");
+                await client.WriteAsync(@event.Type);
+                await client.WriteAsync("\n");
+            }
+
+            await client.WriteAsync("data: ");
+            await client.WriteAsync(@event.Data);
+            await client.WriteAsync("\n\n");
         }
     }
 }
