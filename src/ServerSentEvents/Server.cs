@@ -23,7 +23,7 @@ namespace ServerSentEvents
             return id;
         }
 
-        public async Task SendMessage(ClientId id, Event @event)
+        public async Task SendEvent(ClientId id, Event @event)
         {
             if (!_clients.TryGetValue(id, out var client))
                 throw new ArgumentException($"Unknown client with id {id}.");

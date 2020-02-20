@@ -45,37 +45,50 @@ namespace ServerSentEvents.Test.Unit
         {
             private readonly Server _sut = new Server();
 
+            private async Task<string> GetResponseBodyAfterEventBeingSent(Event @event)
+            {
+                var httpResponse = new FakeHttpResponse();
+                var clientId = await _sut.AddClient(httpResponse);
+
+                await _sut.SendEvent(clientId, @event);
+
+                var body = await httpResponse.Body.ReadFromStart();
+                return body;
+            }
+
             [Fact]
             public void IfClientDoesNotExist_ThrowArgumentException()
             {
                 var nonExistentId = ClientId.NewClientId();
-                _sut.Invoking(x => x.SendMessage(nonExistentId, string.Empty))
+                _sut.Invoking(x => x.SendEvent(nonExistentId, default))
                    .Should().Throw<ArgumentException>();
             }
 
             [Fact]
             public async Task EventDataShouldAppearInHttpResponseBody()
             {
-                var httpResponse = new FakeHttpResponse();
-                var clientId = await _sut.AddClient(httpResponse);
                 var @event = new Event("Hello World");
+                var body = await GetResponseBodyAfterEventBeingSent(@event);
 
-                await _sut.SendMessage(clientId, @event);
-
-                var body = await httpResponse.Body.ReadFromStart();
                 body.Should().Be("data: Hello World\n\n");
             }
 
             [Fact]
             public async Task IfEventHasType_TypeShouldAppearInHttpResponseBody()
             {
-                var httpResponse = new FakeHttpResponse();
-                var clientId = await _sut.AddClient(httpResponse);
                 var @event = new Event("sampleType", "sampleData");
-                await _sut.SendMessage(clientId, @event);
+                var body = await GetResponseBodyAfterEventBeingSent(@event);
 
-                var body = await httpResponse.Body.ReadFromStart();
                 body.Should().Be("event: sampleType\ndata: sampleData\n\n");
+            }
+
+            [Fact]
+            public async Task IfEventTypeEqualsMessage_EventTypeShouldNotBeWritten()
+            {
+                var @event = new Event("message", "sampleData");
+                var body = await GetResponseBodyAfterEventBeingSent(@event);
+
+                body.Should().Be("data: sampleData\n\n");
             }
         }
 

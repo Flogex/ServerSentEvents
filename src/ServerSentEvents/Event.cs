@@ -6,7 +6,7 @@
 
         public Event(string? type, string data)
         {
-            Type = type;
+            Type = type != "message" ? type : null;
             Data = data;
         }
 
