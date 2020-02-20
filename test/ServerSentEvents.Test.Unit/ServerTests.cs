@@ -39,5 +39,17 @@ namespace ServerSentEvents.Test.Unit
                 cachingHeaders.Should().HaveCount(1).And.Contain("no-cache");
             }
         }
+
+        [Fact]
+        public async Task WhenSendingEventToSpecificClient_EventDataShouldAppearInHttpResponseBody()
+        {
+            var _sut = new Server();
+            var httpResponse = new FakeHttpResponse();
+            var clientId = await _sut.AddClient(httpResponse);
+            await _sut.SendMessage(clientId, "Hello World");
+
+            var body = await httpResponse.Body.ReadFromStart();
+            body.Should().Be("data: Hello World\n\n");
+        }
     }
 }
