@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -25,9 +26,7 @@ namespace ServerSentEvents
         public async Task SendMessage(ClientId id, string message)
         {
             if (!_clients.TryGetValue(id, out var client))
-            {
-                return;
-            }
+                throw new ArgumentException($"Unknown client with id {id}.");
 
             await client.WriteAsync("data: ", Encoding.UTF8);
             await client.WriteAsync(message, Encoding.UTF8);

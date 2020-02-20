@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
@@ -40,16 +41,29 @@ namespace ServerSentEvents.Test.Unit
             }
         }
 
-        [Fact]
-        public async Task WhenSendingEventToSpecificClient_EventDataShouldAppearInHttpResponseBody()
+        public class WhenSendingEventToSpecificClient
         {
-            var _sut = new Server();
-            var httpResponse = new FakeHttpResponse();
-            var clientId = await _sut.AddClient(httpResponse);
-            await _sut.SendMessage(clientId, "Hello World");
+            private readonly Server _sut = new Server();
 
-            var body = await httpResponse.Body.ReadFromStart();
-            body.Should().Be("data: Hello World\n\n");
+            [Fact]
+            public void IfClientDoesNotExist_ThrowArgumentException()
+            {
+                var nonExistentId = ClientId.NewClientId();
+                _sut.Invoking(x => x.SendMessage(nonExistentId, string.Empty))
+                   .Should().Throw<ArgumentException>();
+            }
+
+            [Fact]
+            public async Task EventDataShouldAppearInHttpResponseBody()
+            {
+                var httpResponse = new FakeHttpResponse();
+                var clientId = await _sut.AddClient(httpResponse);
+                await _sut.SendMessage(clientId, "Hello World");
+
+                var body = await httpResponse.Body.ReadFromStart();
+                body.Should().Be("data: Hello World\n\n");
+            }
         }
+
     }
 }
