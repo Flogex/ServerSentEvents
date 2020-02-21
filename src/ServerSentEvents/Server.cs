@@ -27,7 +27,15 @@ namespace ServerSentEvents
             if (!_clients.TryGetValue(id, out var client))
                 throw new ArgumentException($"Unknown client with id {id}.");
 
-            return EventSerializer.WriteEvent(@event, client.Body);
+            return EventSerializer.WriteEvent(client.Body, @event);
+        }
+
+        public Task SendComment(ClientId id, string comment)
+        {
+            if (!_clients.TryGetValue(id, out var client))
+                throw new ArgumentException($"Unknown client with id {id}.");
+
+            return EventSerializer.WriteComment(client.Body, comment);
         }
     }
 }

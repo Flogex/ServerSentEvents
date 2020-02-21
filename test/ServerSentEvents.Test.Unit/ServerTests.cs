@@ -119,5 +119,41 @@ namespace ServerSentEvents.Test.Unit
             }
         }
 
+        public class WhenSendingCommentToSpecificClient
+        {
+            private async Task<string> GetResponseBodyAfterCommentBeingSent(string comment)
+            {
+                var sut = new Server();
+                var httpResponse = new FakeHttpResponse();
+                var clientId = await sut.AddClient(httpResponse);
+
+                await sut.SendComment(clientId, comment);
+
+                var body = await httpResponse.Body.ReadFromStart();
+                return body;
+            }
+
+            [Fact]
+            public async Task CommentIsPrefixedByColon()
+            {
+                var body = await GetResponseBodyAfterCommentBeingSent("Hello World");
+                body.Should().Be(":Hello World\n");
+            }
+
+            [Fact]
+            public async Task IfCommentStartsWithColon_ColonIsPreservedInResponseBody()
+            {
+                var body = await GetResponseBodyAfterCommentBeingSent(":comment");
+                body.Should().Be("::comment\n");
+            }
+
+            [Fact]
+            public async Task IfCommentHasMultipleLines_MultipleCommentsInResponseBody()
+            {
+                var body = await GetResponseBodyAfterCommentBeingSent("line1\nline2");
+                body.Should().Be(":line1\n:line2\n");
+            }
+        }
+
     }
 }
