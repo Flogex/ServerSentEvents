@@ -90,6 +90,33 @@ namespace ServerSentEvents.Test.Unit
 
                 body.Should().Be("data: sampleData\n\n");
             }
+
+            [Fact]
+            public async Task IfEventDataContainsLineFeed_MultipleDataLinesShouldBeWrittenToResponseBody()
+            {
+                var @event = new Event("message", "line1\nline2");
+                var body = await GetResponseBodyAfterEventBeingSent(@event);
+
+                body.Should().Be("data: line1\ndata: line2\n\n");
+            }
+
+            [Fact]
+            public async Task ConsecutiveAndIrrelevantLineFeedsAreIgnored()
+            {
+                var @event = new Event("message", "\nline1\n\nline2\n");
+                var body = await GetResponseBodyAfterEventBeingSent(@event);
+
+                body.Should().Be("data: line1\ndata: line2\n\n");
+            }
+
+            [Fact]
+            public async Task IfEventDataContanínsCRLF_CarriageReturnIsIgnored()
+            {
+                var @event = new Event("message", "line1\r\nline2");
+                var body = await GetResponseBodyAfterEventBeingSent(@event);
+
+                body.Should().Be("data: line1\ndata: line2\n\n");
+            }
         }
 
     }
