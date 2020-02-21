@@ -8,8 +8,8 @@ namespace ServerSentEvents
     {
         private static readonly byte[] _linefeed = new byte[] { 10 };
         private static readonly byte[] _colon = new byte[] { 58 };
-        private static readonly byte[] _eventLabel = Encoding.UTF8.GetBytes("event: ");
-        private static readonly byte[] _dataLabel = Encoding.UTF8.GetBytes("data: ");
+        private static readonly byte[] _eventLabel = Encoding.UTF8.GetBytes("event:");
+        private static readonly byte[] _dataLabel = Encoding.UTF8.GetBytes("data:");
 
         public static async Task WriteEvent(Stream stream, Event @event)
         {

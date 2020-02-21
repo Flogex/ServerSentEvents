@@ -70,7 +70,7 @@ namespace ServerSentEvents.Test.Unit
                 var @event = new Event("Hello World");
                 var body = await GetResponseBodyAfterEventBeingSent(@event);
 
-                body.Should().Be("data: Hello World\n\n");
+                body.Should().Be("data:Hello World\n\n");
             }
 
             [Fact]
@@ -79,7 +79,7 @@ namespace ServerSentEvents.Test.Unit
                 var @event = new Event("sampleType", "sampleData");
                 var body = await GetResponseBodyAfterEventBeingSent(@event);
 
-                body.Should().Be("event: sampleType\ndata: sampleData\n\n");
+                body.Should().Be("event:sampleType\ndata: sampleData\n\n");
             }
 
             [Fact]
@@ -88,7 +88,7 @@ namespace ServerSentEvents.Test.Unit
                 var @event = new Event("message", "sampleData");
                 var body = await GetResponseBodyAfterEventBeingSent(@event);
 
-                body.Should().Be("data: sampleData\n\n");
+                body.Should().Be("data:sampleData\n\n");
             }
 
             [Fact]
@@ -97,7 +97,7 @@ namespace ServerSentEvents.Test.Unit
                 var @event = new Event("message", "line1\nline2");
                 var body = await GetResponseBodyAfterEventBeingSent(@event);
 
-                body.Should().Be("data: line1\ndata: line2\n\n");
+                body.Should().Be("data:line1\ndata:line2\n\n");
             }
 
             [Fact]
@@ -106,7 +106,7 @@ namespace ServerSentEvents.Test.Unit
                 var @event = new Event("message", "\nline1\n\nline2\n");
                 var body = await GetResponseBodyAfterEventBeingSent(@event);
 
-                body.Should().Be("data: line1\ndata: line2\n\n");
+                body.Should().Be("data:line1\ndata:line2\n\n");
             }
 
             [Fact]
@@ -115,7 +115,7 @@ namespace ServerSentEvents.Test.Unit
                 var @event = new Event("message", "line1\r\nline2");
                 var body = await GetResponseBodyAfterEventBeingSent(@event);
 
-                body.Should().Be("data: line1\ndata: line2\n\n");
+                body.Should().Be("data:line1\ndata:line2\n\n");
             }
         }
 
