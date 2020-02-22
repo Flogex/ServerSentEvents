@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
-namespace ServerSentEvents.Test.Unit
+namespace ServerSentEvents.Test.Unit.Fakes
 {
     internal class FakeHttpResponse : HttpResponse
     {

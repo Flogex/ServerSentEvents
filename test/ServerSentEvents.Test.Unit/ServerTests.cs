@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using ServerSentEvents.Test.Unit.Fakes;
 using Xunit;
 
 namespace ServerSentEvents.Test.Unit
@@ -14,7 +15,7 @@ namespace ServerSentEvents.Test.Unit
             {
                 var httpResponse = new FakeHttpResponse();
                 var sut = new Server();
-                await sut.AddClient(httpResponse);
+                await sut.AddClient(new FakeHttpContext(httpResponse));
                 return httpResponse;
             }
 
@@ -48,7 +49,7 @@ namespace ServerSentEvents.Test.Unit
             private async Task<string> GetResponseBodyAfterEventBeingSent(Event @event)
             {
                 var httpResponse = new FakeHttpResponse();
-                var clientId = await _sut.AddClient(httpResponse);
+                var clientId = await _sut.AddClient(new FakeHttpContext(httpResponse));
 
                 await _sut.SendEvent(clientId, @event);
 
@@ -79,7 +80,7 @@ namespace ServerSentEvents.Test.Unit
                 var @event = new Event("sampleType", "sampleData");
                 var body = await GetResponseBodyAfterEventBeingSent(@event);
 
-                body.Should().Be("event:sampleType\ndata: sampleData\n\n");
+                body.Should().Be("event:sampleType\ndata:sampleData\n\n");
             }
 
             [Fact]
@@ -125,7 +126,7 @@ namespace ServerSentEvents.Test.Unit
             {
                 var sut = new Server();
                 var httpResponse = new FakeHttpResponse();
-                var clientId = await sut.AddClient(httpResponse);
+                var clientId = await sut.AddClient(new FakeHttpContext(httpResponse));
 
                 await sut.SendComment(clientId, comment);
 

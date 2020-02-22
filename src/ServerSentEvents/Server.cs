@@ -7,13 +7,14 @@ namespace ServerSentEvents
 {
     public class Server
     {
-        private readonly Dictionary<ClientId, HttpResponse> _clients = new Dictionary<ClientId, HttpResponse>();
+        private readonly Dictionary<ClientId, HttpContext> _clients = new Dictionary<ClientId, HttpContext>();
 
-        public async Task<ClientId> AddClient(HttpResponse response)
+        public async Task<ClientId> AddClient(HttpContext context)
         {
             var id = ClientId.NewClientId();
-            _clients.Add(id, response);
+            _clients.Add(id, context);
 
+            var response = context.Response;
             response.StatusCode = 200;
             response.ContentType = "text/event-stream";
             response.Headers.Add("Cache-Control", "no-cache");
@@ -27,7 +28,7 @@ namespace ServerSentEvents
             if (!_clients.TryGetValue(id, out var client))
                 throw new ArgumentException($"Unknown client with id {id}.");
 
-            return EventSerializer.WriteEvent(client.Body, @event);
+            return EventSerializer.WriteEvent(client.Response.Body, @event);
         }
 
         public Task SendComment(ClientId id, string comment)
@@ -35,7 +36,7 @@ namespace ServerSentEvents
             if (!_clients.TryGetValue(id, out var client))
                 throw new ArgumentException($"Unknown client with id {id}.");
 
-            return EventSerializer.WriteComment(client.Body, comment);
+            return EventSerializer.WriteComment(client.Response.Body, comment);
         }
     }
 }
