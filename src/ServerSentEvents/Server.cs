@@ -14,6 +14,8 @@ namespace ServerSentEvents
             var id = ClientId.NewClientId();
             _clients.Add(id, context);
 
+            context.RequestAborted.Register(state => RemoveClient((ClientId)state!), id);
+
             var response = context.Response;
             response.StatusCode = 200;
             response.ContentType = "text/event-stream";
@@ -23,10 +25,16 @@ namespace ServerSentEvents
             return id;
         }
 
+        public void RemoveClient(ClientId id)
+        {
+            if (_clients.Remove(id, out var context))
+                context.Abort();
+        }
+
         public Task SendEvent(ClientId id, Event @event)
         {
             if (!_clients.TryGetValue(id, out var client))
-                throw new ArgumentException($"Unknown client with id {id}.");
+                throw new ArgumentException($"Unknown client with id {id}.", nameof(id));
 
             return EventSerializer.WriteEvent(client.Response.Body, @event);
         }

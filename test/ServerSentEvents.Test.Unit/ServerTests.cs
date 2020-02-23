@@ -156,5 +156,50 @@ namespace ServerSentEvents.Test.Unit
             }
         }
 
+        public class WhenConnectionIsAborted
+        {
+            [Fact]
+            public async Task ClientIsRemoved()
+            {
+                var sut = new Server();
+                var context = new FakeHttpContext(new FakeHttpResponse());
+                var clientId = await sut.AddClient(context);
+
+                context.Abort();
+
+                sut.Invoking(s => s.SendEvent(clientId, default))
+                   .Should().Throw<ArgumentException>()
+                            .Where(e => e.ParamName == "id");
+            }
+        }
+
+        public class WhenRemovingClient
+        {
+            private readonly Server _sut = new Server();
+
+            [Fact]
+            public async Task CannotSendMessageToClient()
+            {
+                var context = new FakeHttpContext(new FakeHttpResponse());
+                var clientId = await _sut.AddClient(context);
+
+                _sut.RemoveClient(clientId);
+
+                _sut.Invoking(s => s.SendEvent(clientId, default))
+                   .Should().Throw<ArgumentException>()
+                            .Where(e => e.ParamName == "id");
+            }
+
+            [Fact]
+            public async Task ConnectionToClientIsAborted()
+            {
+                var context = new FakeHttpContext(new FakeHttpResponse());
+                var clientId = await _sut.AddClient(context);
+
+                _sut.RemoveClient(clientId);
+
+                context.RequestAborted.IsCancellationRequested.Should().BeTrue();
+            }
+        }
     }
 }
