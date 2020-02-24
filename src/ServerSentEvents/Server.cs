@@ -42,9 +42,17 @@ namespace ServerSentEvents
         public Task SendComment(ClientId id, string comment)
         {
             if (!_clients.TryGetValue(id, out var client))
-                throw new ArgumentException($"Unknown client with id {id}.");
+                throw new ArgumentException($"Unknown client with id {id}.", nameof(id));
 
             return EventSerializer.WriteComment(client.Response.Body, comment);
+        }
+
+        public Task SendWaitRequest(ClientId id, TimeSpan reconnectionTime)
+        {
+            if (!_clients.TryGetValue(id, out var client))
+                throw new ArgumentException($"Unknown client with id {id}.", nameof(id));
+
+            return EventSerializer.WriteRetry(client.Response.Body, reconnectionTime);
         }
     }
 }

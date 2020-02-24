@@ -137,6 +137,7 @@ namespace ServerSentEvents.Test.Unit
             [Fact]
             public async Task CommentIsPrefixedByColon()
             {
+                //TODO Should be two linefeeds
                 var body = await GetResponseBodyAfterCommentBeingSent("Hello World");
                 body.Should().Be(":Hello World\n");
             }
@@ -199,6 +200,22 @@ namespace ServerSentEvents.Test.Unit
                 _sut.RemoveClient(clientId);
 
                 context.RequestAborted.IsCancellationRequested.Should().BeTrue();
+            }
+        }
+
+        public class WhenSendingWaitRequest
+        {
+            [Fact]
+            public async Task HttpResponseBodyContainsRetryFieldWithReconnectionTime()
+            {
+                var sut = new Server();
+                var httpResponse = new FakeHttpResponse();
+                var clientId = await sut.AddClient(new FakeHttpContext(httpResponse));
+
+                await sut.SendWaitRequest(clientId, TimeSpan.FromMilliseconds(1000));
+
+                var body = await httpResponse.Body.ReadFromStart();
+                body.Should().Be("retry:1000\n\n");
             }
         }
     }

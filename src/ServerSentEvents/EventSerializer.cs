@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,6 +11,7 @@ namespace ServerSentEvents
         private static readonly byte[] _colon = new byte[] { 58 };
         private static readonly byte[] _eventLabel = Encoding.UTF8.GetBytes("event:");
         private static readonly byte[] _dataLabel = Encoding.UTF8.GetBytes("data:");
+        private static readonly byte[] _retryLabel = Encoding.UTF8.GetBytes("retry:");
 
         public static async Task WriteEvent(Stream stream, Event @event)
         {
@@ -27,11 +29,25 @@ namespace ServerSentEvents
             await stream.FlushAsync();
         }
 
+        internal static async Task WriteRetry(Stream stream, TimeSpan reconnectionTime)
+        {
+            await stream.WriteAll(_retryLabel);
+
+            var milliseconds = (int)Math.Round(reconnectionTime.TotalMilliseconds,
+                                               0, MidpointRounding.AwayFromZero);
+            var bytes = milliseconds.ToByteArray();
+
+            await stream.WriteAll(bytes);
+            await stream.WriteLineFeed();
+            await stream.WriteLineFeed();
+            await stream.FlushAsync();
+        }
+
         private static async Task WriteEventType(Stream stream, string type)
         {
-            await stream.WriteAsync(_eventLabel, 0, _eventLabel.Length);
+            await stream.WriteAll(_eventLabel);
             var bytes = Encoding.UTF8.GetBytes(type);
-            await stream.WriteAsync(bytes, 0, bytes.Length);
+            await stream.WriteAll(bytes);
             await stream.WriteLineFeed();
         }
 

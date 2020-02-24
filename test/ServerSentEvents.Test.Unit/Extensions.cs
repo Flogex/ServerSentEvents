@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace ServerSentEvents.Test.Unit
 {
-    public static class HelperExtensions
+    public static class Extensions
     {
         public static async Task<string> ReadFromStart(this Stream stream)
         {
