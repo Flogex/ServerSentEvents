@@ -77,7 +77,7 @@ namespace ServerSentEvents.Test.Unit
             [Fact]
             public async Task IfEventHasType_TypeShouldAppearInHttpResponseBody()
             {
-                var @event = new Event("sampleType", "sampleData");
+                var @event = new Event("sampleData", "sampleType");
                 var body = await GetResponseBodyAfterEventBeingSent(@event);
 
                 body.Should().Be("event:sampleType\ndata:sampleData\n\n");
@@ -86,7 +86,7 @@ namespace ServerSentEvents.Test.Unit
             [Fact]
             public async Task IfEventTypeEqualsMessage_EventTypeShouldNotBeWritten()
             {
-                var @event = new Event("message", "sampleData");
+                var @event = new Event("sampleData", "message");
                 var body = await GetResponseBodyAfterEventBeingSent(@event);
 
                 body.Should().Be("data:sampleData\n\n");
@@ -95,7 +95,7 @@ namespace ServerSentEvents.Test.Unit
             [Fact]
             public async Task IfEventDataContainsLineFeed_MultipleDataLinesShouldBeWrittenToResponseBody()
             {
-                var @event = new Event("message", "line1\nline2");
+                var @event = new Event("line1\nline2");
                 var body = await GetResponseBodyAfterEventBeingSent(@event);
 
                 body.Should().Be("data:line1\ndata:line2\n\n");
@@ -104,7 +104,7 @@ namespace ServerSentEvents.Test.Unit
             [Fact]
             public async Task ConsecutiveAndIrrelevantLineFeedsAreIgnored()
             {
-                var @event = new Event("message", "\nline1\n\nline2\n");
+                var @event = new Event("\nline1\n\nline2\n");
                 var body = await GetResponseBodyAfterEventBeingSent(@event);
 
                 body.Should().Be("data:line1\ndata:line2\n\n");
@@ -113,7 +113,7 @@ namespace ServerSentEvents.Test.Unit
             [Fact]
             public async Task IfEventDataContanínsCRLF_CarriageReturnIsIgnored()
             {
-                var @event = new Event("message", "line1\r\nline2");
+                var @event = new Event("line1\r\nline2");
                 var body = await GetResponseBodyAfterEventBeingSent(@event);
 
                 body.Should().Be("data:line1\ndata:line2\n\n");
@@ -137,7 +137,6 @@ namespace ServerSentEvents.Test.Unit
             [Fact]
             public async Task CommentIsPrefixedByColon()
             {
-                //TODO Should be two linefeeds
                 var body = await GetResponseBodyAfterCommentBeingSent("Hello World");
                 body.Should().Be(":Hello World\n\n");
             }
