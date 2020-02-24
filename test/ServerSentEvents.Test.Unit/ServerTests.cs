@@ -77,7 +77,7 @@ namespace ServerSentEvents.Test.Unit
             [Fact]
             public async Task IfEventHasType_TypeShouldAppearInHttpResponseBody()
             {
-                var @event = new Event("sampleData", "sampleType");
+                var @event = new Event("sampleData", type: "sampleType");
                 var body = await GetResponseBodyAfterEventBeingSent(@event);
 
                 body.Should().Be("event:sampleType\ndata:sampleData\n\n");
@@ -86,10 +86,28 @@ namespace ServerSentEvents.Test.Unit
             [Fact]
             public async Task IfEventTypeEqualsMessage_EventTypeShouldNotBeWritten()
             {
-                var @event = new Event("sampleData", "message");
+                var @event = new Event("sampleData", type: "message");
                 var body = await GetResponseBodyAfterEventBeingSent(@event);
 
                 body.Should().Be("data:sampleData\n\n");
+            }
+
+            [Fact]
+            public async Task IfEventHasId_IdShouldAppearInHttpResponseBody()
+            {
+                var @event = new Event("sampleData", id: "sampleId");
+                var body = await GetResponseBodyAfterEventBeingSent(@event);
+
+                body.Should().Be("id:sampleId\ndata:sampleData\n\n");
+            }
+
+            [Fact]
+            public async Task IfEventHasIdAndType_BothShouldAppearInHttpResponseBody()
+            {
+                var @event = new Event("sampleData", "sampleType", "sampleId");
+                var body = await GetResponseBodyAfterEventBeingSent(@event);
+
+                body.Should().Be("id:sampleId\nevent:sampleType\ndata:sampleData\n\n");
             }
 
             [Fact]

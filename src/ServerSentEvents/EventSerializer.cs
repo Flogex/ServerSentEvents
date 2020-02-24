@@ -9,12 +9,16 @@ namespace ServerSentEvents
     {
         private static readonly byte[] _linefeed = new byte[] { 10 };
         private static readonly byte[] _colon = new byte[] { 58 };
+        private static readonly byte[] _idLabel = Encoding.UTF8.GetBytes("id:");
         private static readonly byte[] _eventLabel = Encoding.UTF8.GetBytes("event:");
         private static readonly byte[] _dataLabel = Encoding.UTF8.GetBytes("data:");
         private static readonly byte[] _retryLabel = Encoding.UTF8.GetBytes("retry:");
 
         public static async Task WriteEvent(Stream stream, Event @event)
         {
+            if (@event.Id != null)
+                await stream.WriteEventId(@event.Id);
+
             if (@event.Type != null)
                 await stream.WriteEventType(@event.Type);
 
@@ -42,6 +46,14 @@ namespace ServerSentEvents
             await stream.WriteLineFeed();
             await stream.WriteLineFeed();
             await stream.FlushAsync();
+        }
+
+        private static async Task WriteEventId(this Stream stream, string id)
+        {
+            await stream.WriteAll(_idLabel);
+            var bytes = Encoding.UTF8.GetBytes(id);
+            await stream.WriteAll(bytes);
+            await stream.WriteLineFeed();
         }
 
         private static async Task WriteEventType(this Stream stream, string type)
