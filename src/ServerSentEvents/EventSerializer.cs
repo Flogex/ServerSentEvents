@@ -26,6 +26,7 @@ namespace ServerSentEvents
         public static async Task WriteComment(Stream stream, string comment)
         {
             await WriteLabeledLines(stream, _colon, comment);
+            await stream.WriteLineFeed();
             await stream.FlushAsync();
         }
 

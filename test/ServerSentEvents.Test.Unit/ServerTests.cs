@@ -139,21 +139,21 @@ namespace ServerSentEvents.Test.Unit
             {
                 //TODO Should be two linefeeds
                 var body = await GetResponseBodyAfterCommentBeingSent("Hello World");
-                body.Should().Be(":Hello World\n");
+                body.Should().Be(":Hello World\n\n");
             }
 
             [Fact]
             public async Task IfCommentStartsWithColon_ColonIsPreservedInResponseBody()
             {
                 var body = await GetResponseBodyAfterCommentBeingSent(":comment");
-                body.Should().Be("::comment\n");
+                body.Should().Be("::comment\n\n");
             }
 
             [Fact]
             public async Task IfCommentHasMultipleLines_MultipleCommentsInResponseBody()
             {
                 var body = await GetResponseBodyAfterCommentBeingSent("line1\nline2");
-                body.Should().Be(":line1\n:line2\n");
+                body.Should().Be(":line1\n:line2\n\n");
             }
         }
 
