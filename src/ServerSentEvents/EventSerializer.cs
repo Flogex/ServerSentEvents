@@ -16,21 +16,21 @@ namespace ServerSentEvents
         public static async Task WriteEvent(Stream stream, Event @event)
         {
             if (@event.Type != null)
-                await WriteEventType(stream, @event.Type);
+                await stream.WriteEventType(@event.Type);
 
-            await WriteEventData(stream, @event.Data);
+            await stream.WriteEventData(@event.Data);
 
             await stream.FlushAsync();
         }
 
         public static async Task WriteComment(Stream stream, string comment)
         {
-            await WriteLabeledLines(stream, _colon, comment);
+            await stream.WriteLabeledLines(_colon, comment);
             await stream.WriteLineFeed();
             await stream.FlushAsync();
         }
 
-        internal static async Task WriteRetry(Stream stream, TimeSpan reconnectionTime)
+        public static async Task WriteRetry(Stream stream, TimeSpan reconnectionTime)
         {
             await stream.WriteAll(_retryLabel);
 
@@ -44,7 +44,7 @@ namespace ServerSentEvents
             await stream.FlushAsync();
         }
 
-        private static async Task WriteEventType(Stream stream, string type)
+        private static async Task WriteEventType(this Stream stream, string type)
         {
             await stream.WriteAll(_eventLabel);
             var bytes = Encoding.UTF8.GetBytes(type);
@@ -52,13 +52,13 @@ namespace ServerSentEvents
             await stream.WriteLineFeed();
         }
 
-        private static async Task WriteEventData(Stream stream, string data)
+        private static async Task WriteEventData(this Stream stream, string data)
         {
-            await WriteLabeledLines(stream, _dataLabel, data);
+            await stream.WriteLabeledLines(_dataLabel, data);
             await stream.WriteLineFeed();
         }
 
-        private static async Task WriteLabeledLines(Stream stream, byte[] label, string lines)
+        private static async Task WriteLabeledLines(this Stream stream, byte[] label, string lines)
         {
             var startIndex = 0;
             do
