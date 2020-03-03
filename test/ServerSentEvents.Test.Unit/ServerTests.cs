@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using FluentAssertions;
-using Microsoft.AspNetCore.Http;
 using ServerSentEvents.Test.Unit.Fakes;
 using Xunit;
 
@@ -9,56 +8,23 @@ namespace ServerSentEvents.Test.Unit
 {
     public class ServerTests
     {
-        public class WhenAddingClient
-        {
-            private async Task<HttpResponse> GetHttpResponseAfterAddedAsClient()
-            {
-                var httpResponse = new FakeHttpResponse();
-                var sut = new Server();
-                await sut.AddClient(new FakeHttpContext(httpResponse));
-                return httpResponse;
-            }
-
-            [Fact]
-            public async Task HttpResponseStatusShouldBeOK()
-            {
-                var httpResponse = await GetHttpResponseAfterAddedAsClient();
-                httpResponse.StatusCode.Should().Be(200);
-            }
-
-            [Fact]
-            public async Task HttpResponseContentTypeShouldBeEventStream()
-            {
-                var httpResponse = await GetHttpResponseAfterAddedAsClient();
-                httpResponse.ContentType.Should().Be("text/event-stream");
-            }
-
-            [Fact]
-            public async Task HttpResponseCacheHeaderShouldIndicateNoCaching()
-            {
-                var httpResponse = await GetHttpResponseAfterAddedAsClient();
-                var cachingHeaders = httpResponse.Headers["Cache-Control"];
-                cachingHeaders.Should().HaveCount(1).And.Contain("no-cache");
-            }
-        }
-
         public class WhenSendingEventToSpecificClient
         {
             private readonly Server _sut = new Server();
 
             private async Task<string> GetResponseBodyAfterEventBeingSent(Event @event)
             {
-                var httpResponse = new FakeHttpResponse();
-                var clientId = await _sut.AddClient(new FakeHttpContext(httpResponse));
+                var context = FakeHttpContext.GetInstance();
+                var clientId = await _sut.AddClient(context);
 
                 await _sut.SendEvent(clientId, @event);
 
-                var body = await httpResponse.Body.ReadFromStart();
+                var body = await context.Response.Body.ReadFromStart();
                 return body;
             }
 
             [Fact]
-            public void IfClientDoesNotExist_ThrowArgumentException()
+            public void IfClientDoesNotExist_ShouldThrowArgumentException()
             {
                 var nonExistentId = ClientId.NewClientId();
                 _sut.Invoking(x => x.SendEvent(nonExistentId, default))
@@ -66,7 +32,7 @@ namespace ServerSentEvents.Test.Unit
             }
 
             [Fact]
-            public async Task EventDataShouldAppearInHttpResponseBody()
+            public async Task EventDataShouldBeWrittenToBody()
             {
                 var @event = new Event("Hello World");
                 var body = await GetResponseBodyAfterEventBeingSent(@event);
@@ -75,7 +41,7 @@ namespace ServerSentEvents.Test.Unit
             }
 
             [Fact]
-            public async Task IfEventHasType_TypeShouldAppearInHttpResponseBody()
+            public async Task IfEventHasType_TypeShouldBeWrittenToBody()
             {
                 var @event = new Event("sampleData", type: "sampleType");
                 var body = await GetResponseBodyAfterEventBeingSent(@event);
@@ -93,7 +59,7 @@ namespace ServerSentEvents.Test.Unit
             }
 
             [Fact]
-            public async Task IfEventHasId_IdShouldAppearInHttpResponseBody()
+            public async Task IfEventHasId_IdShouldBeWrittenToBody()
             {
                 var @event = new Event("sampleData", id: "sampleId");
                 var body = await GetResponseBodyAfterEventBeingSent(@event);
@@ -102,7 +68,7 @@ namespace ServerSentEvents.Test.Unit
             }
 
             [Fact]
-            public async Task IfEventHasIdAndType_BothShouldAppearInHttpResponseBody()
+            public async Task IfEventHasIdAndType_BothShouldBeWrittenToBody()
             {
                 var @event = new Event("sampleData", "sampleType", "sampleId");
                 var body = await GetResponseBodyAfterEventBeingSent(@event);
@@ -111,7 +77,7 @@ namespace ServerSentEvents.Test.Unit
             }
 
             [Fact]
-            public async Task IfEventDataContainsLineFeed_MultipleDataLinesShouldBeWrittenToResponseBody()
+            public async Task IfEventDataContainsLineFeed_BodyShouldContainMultipleDataLines()
             {
                 var @event = new Event("line1\nline2");
                 var body = await GetResponseBodyAfterEventBeingSent(@event);
@@ -120,7 +86,7 @@ namespace ServerSentEvents.Test.Unit
             }
 
             [Fact]
-            public async Task ConsecutiveAndIrrelevantLineFeedsAreIgnored()
+            public async Task ConsecutiveAndIrrelevantLineFeedsShouldBeIgnored()
             {
                 var @event = new Event("\nline1\n\nline2\n");
                 var body = await GetResponseBodyAfterEventBeingSent(@event);
@@ -129,7 +95,7 @@ namespace ServerSentEvents.Test.Unit
             }
 
             [Fact]
-            public async Task IfEventDataContanínsCRLF_CarriageReturnIsIgnored()
+            public async Task IfEventDataContaninsCRLF_CarriageReturnShouldBeIgnored()
             {
                 var @event = new Event("line1\r\nline2");
                 var body = await GetResponseBodyAfterEventBeingSent(@event);
@@ -143,95 +109,49 @@ namespace ServerSentEvents.Test.Unit
             private async Task<string> GetResponseBodyAfterCommentBeingSent(string comment)
             {
                 var sut = new Server();
-                var httpResponse = new FakeHttpResponse();
-                var clientId = await sut.AddClient(new FakeHttpContext(httpResponse));
+                var context = FakeHttpContext.GetInstance();
+                var clientId = await sut.AddClient(context);
 
                 await sut.SendComment(clientId, comment);
 
-                var body = await httpResponse.Body.ReadFromStart();
+                var body = await context.Response.Body.ReadFromStart();
                 return body;
             }
 
             [Fact]
-            public async Task CommentIsPrefixedByColon()
+            public async Task CommentShouldBePrefixedByColon()
             {
                 var body = await GetResponseBodyAfterCommentBeingSent("Hello World");
                 body.Should().Be(":Hello World\n\n");
             }
 
             [Fact]
-            public async Task IfCommentStartsWithColon_ColonIsPreservedInResponseBody()
+            public async Task IfCommentStartsWithColon_ColonShouldBePreservedInBody()
             {
                 var body = await GetResponseBodyAfterCommentBeingSent(":comment");
                 body.Should().Be("::comment\n\n");
             }
 
             [Fact]
-            public async Task IfCommentHasMultipleLines_MultipleCommentsInResponseBody()
+            public async Task IfCommentHasMultipleLines_BodyShouldContainMultipleComments()
             {
                 var body = await GetResponseBodyAfterCommentBeingSent("line1\nline2");
                 body.Should().Be(":line1\n:line2\n\n");
             }
         }
 
-        public class WhenConnectionIsAborted
-        {
-            [Fact]
-            public async Task ClientIsRemoved()
-            {
-                var sut = new Server();
-                var context = new FakeHttpContext(new FakeHttpResponse());
-                var clientId = await sut.AddClient(context);
-
-                context.Abort();
-
-                sut.Invoking(s => s.SendEvent(clientId, default))
-                   .Should().Throw<ArgumentException>()
-                            .Where(e => e.ParamName == "id");
-            }
-        }
-
-        public class WhenRemovingClient
-        {
-            private readonly Server _sut = new Server();
-
-            [Fact]
-            public async Task CannotSendMessageToClient()
-            {
-                var context = new FakeHttpContext(new FakeHttpResponse());
-                var clientId = await _sut.AddClient(context);
-
-                _sut.RemoveClient(clientId);
-
-                _sut.Invoking(s => s.SendEvent(clientId, default))
-                   .Should().Throw<ArgumentException>()
-                            .Where(e => e.ParamName == "id");
-            }
-
-            [Fact]
-            public async Task ConnectionToClientIsAborted()
-            {
-                var context = new FakeHttpContext(new FakeHttpResponse());
-                var clientId = await _sut.AddClient(context);
-
-                _sut.RemoveClient(clientId);
-
-                context.RequestAborted.IsCancellationRequested.Should().BeTrue();
-            }
-        }
-
         public class WhenSendingWaitRequest
         {
             [Fact]
-            public async Task HttpResponseBodyContainsRetryFieldWithReconnectionTime()
+            public async Task BodyShouldContainRetryFieldWithReconnectionTime()
             {
                 var sut = new Server();
-                var httpResponse = new FakeHttpResponse();
-                var clientId = await sut.AddClient(new FakeHttpContext(httpResponse));
+                var context = FakeHttpContext.GetInstance();
+                var clientId = await sut.AddClient(context);
 
                 await sut.SendWaitRequest(clientId, TimeSpan.FromMilliseconds(1000));
 
-                var body = await httpResponse.Body.ReadFromStart();
+                var body = await context.Response.Body.ReadFromStart();
                 body.Should().Be("retry:1000\n\n");
             }
         }

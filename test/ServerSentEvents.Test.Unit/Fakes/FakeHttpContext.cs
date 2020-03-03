@@ -9,13 +9,13 @@ namespace ServerSentEvents.Test.Unit.Fakes
 {
     internal class FakeHttpContext : HttpContext
     {
-        private readonly CancellationTokenSource abortTokenSource;
+        private readonly CancellationTokenSource _abortTokenSource;
 
         public FakeHttpContext(HttpResponse response)
         {
             Response = response;
-            abortTokenSource = new CancellationTokenSource();
-            RequestAborted = abortTokenSource.Token;
+            _abortTokenSource = new CancellationTokenSource();
+            RequestAborted = _abortTokenSource.Token;
         }
 
         public override ConnectionInfo Connection { get; }
@@ -30,6 +30,9 @@ namespace ServerSentEvents.Test.Unit.Fakes
         public override ClaimsPrincipal User { get; set; }
         public override WebSocketManager WebSockets { get; }
 
-        public override void Abort() => abortTokenSource.Cancel();
+        public override void Abort() => _abortTokenSource.Cancel();
+
+        public static HttpContext GetInstance()
+            => new FakeHttpContext(new FakeHttpResponse());
     }
 }
