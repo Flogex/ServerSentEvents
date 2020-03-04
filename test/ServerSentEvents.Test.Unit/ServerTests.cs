@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using FluentAssertions;
+using ServerSentEvents.Events;
 using ServerSentEvents.Test.Unit.Fakes;
 using Xunit;
 
@@ -17,7 +18,7 @@ namespace ServerSentEvents.Test.Unit
                 var context = FakeHttpContext.GetInstance();
                 var clientId = await _sut.AddClient(context);
 
-                await _sut.SendEvent(clientId, @event);
+                await _sut.Send(clientId, @event);
 
                 var body = await context.Response.Body.ReadFromStart();
                 return body;

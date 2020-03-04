@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using ServerSentEvents.Events;
 
 namespace ServerSentEvents
 {
@@ -31,28 +32,21 @@ namespace ServerSentEvents
                 context.Abort();
         }
 
-        public Task SendEvent(ClientId id, Event @event)
+        public Task Send(ClientId id, IEvent @event)
         {
             if (!_clients.TryGetValue(id, out var client))
                 throw new ArgumentException($"Unknown client with id {id}.", nameof(id));
 
-            return EventSerializer.WriteEvent(client.Response.Body, @event);
+            return @event.WriteToStream(client.Response.Body);
         }
+
+        public Task SendEvent(ClientId id, Event @event)
+            => Send(id, @event);
 
         public Task SendComment(ClientId id, string comment)
-        {
-            if (!_clients.TryGetValue(id, out var client))
-                throw new ArgumentException($"Unknown client with id {id}.", nameof(id));
-
-            return EventSerializer.WriteComment(client.Response.Body, comment);
-        }
+            => Send(id, new Comment(comment));
 
         public Task SendWaitRequest(ClientId id, TimeSpan reconnectionTime)
-        {
-            if (!_clients.TryGetValue(id, out var client))
-                throw new ArgumentException($"Unknown client with id {id}.", nameof(id));
-
-            return EventSerializer.WriteRetry(client.Response.Body, reconnectionTime);
-        }
+            => Send(id, new WaitRequest(reconnectionTime));
     }
 }

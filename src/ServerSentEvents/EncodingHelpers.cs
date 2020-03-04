@@ -2,7 +2,7 @@
 
 namespace ServerSentEvents
 {
-    internal static class EncodingHelper
+    internal static class EncodingHelpers
     {
         public static byte[] ToByteArray(this int number)
         {
