@@ -18,9 +18,9 @@ namespace ServerSentEvents.Test.Unit
 
             _sut.RemoveClient(clientId);
 
-            _sut.Invoking(s => s.SendEvent(clientId, default))
+            _sut.Invoking(s => s.Send(clientId, new FakeEvent()))
                .Should().Throw<ArgumentException>()
-                        .Where(e => e.ParamName == "id");
+                        .Where(e => e.ParamName == "clientId");
         }
 
         [Fact]
@@ -47,9 +47,9 @@ namespace ServerSentEvents.Test.Unit
             context.Abort();
 
             // Trying to send event should fail
-            sut.Invoking(s => s.SendEvent(clientId, default))
+            sut.Invoking(s => s.Send(clientId, new FakeEvent()))
                .Should().Throw<ArgumentException>()
-                        .Where(e => e.ParamName == "id");
+                        .Where(e => e.ParamName == "clientId");
         }
     }
 }

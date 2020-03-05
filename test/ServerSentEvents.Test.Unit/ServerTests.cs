@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using FluentAssertions;
-using ServerSentEvents.Events;
 using ServerSentEvents.Test.Unit.Fakes;
 using Xunit;
 
@@ -17,20 +16,23 @@ namespace ServerSentEvents.Test.Unit
                 var sut = new Server();
                 var nonExistentId = ClientId.NewClientId();
 
-                sut.Invoking(x => x.Send(nonExistentId, default))
+                sut.Invoking(x => x.Send(nonExistentId, new FakeEvent()))
                    .Should().Throw<ArgumentException>();
             }
         }
 
         public class SendEvent
         {
-            private async Task<string> GetResponseBodyAfterEventBeingSent(Event @event)
+            private async Task<string> GetResponseBodyAfterEventBeingSent(
+                string data,
+                string type = null,
+                string id = null)
             {
                 var sut = new Server();
                 var context = FakeHttpContext.GetInstance();
                 var clientId = await sut.AddClient(context);
 
-                await sut.Send(clientId, @event);
+                await sut.SendEvent(clientId, data, type, id);
 
                 var body = await context.Response.Body.ReadFromStart();
                 return body;
@@ -39,17 +41,16 @@ namespace ServerSentEvents.Test.Unit
             [Fact]
             public async Task EventDataShouldBeWrittenToBody()
             {
-                var @event = new Event("Hello World");
-                var body = await GetResponseBodyAfterEventBeingSent(@event);
-
+                var body = await GetResponseBodyAfterEventBeingSent("Hello World");
                 body.Should().Be("data:Hello World\n\n");
             }
 
             [Fact]
             public async Task IfEventHasType_TypeShouldBeWrittenToBody()
             {
-                var @event = new Event("sampleData", type: "sampleType");
-                var body = await GetResponseBodyAfterEventBeingSent(@event);
+                var body = await GetResponseBodyAfterEventBeingSent(
+                    "sampleData",
+                    type: "sampleType");
 
                 body.Should().Contain("event:sampleType\n");
             }
@@ -57,8 +58,9 @@ namespace ServerSentEvents.Test.Unit
             [Fact]
             public async Task IfEventTypeEqualsMessage_EventTypeShouldNotBeWritten()
             {
-                var @event = new Event("sampleData", type: "message");
-                var body = await GetResponseBodyAfterEventBeingSent(@event);
+                var body = await GetResponseBodyAfterEventBeingSent(
+                    "sampleData",
+                    type: "message");
 
                 body.Should().Be("data:sampleData\n\n");
             }
@@ -66,17 +68,20 @@ namespace ServerSentEvents.Test.Unit
             [Fact]
             public async Task IfEventHasId_IdShouldBeWrittenToBody()
             {
-                var @event = new Event("sampleData", id: "sampleId");
-                var body = await GetResponseBodyAfterEventBeingSent(@event);
+                var body = await GetResponseBodyAfterEventBeingSent(
+                    "sampleData",
+                    id: "sampleId");
 
-                body.Should().Be("id:sampleId\ndata:sampleData\n\n");
+                body.Should().Contain("id:sampleId\n");
             }
 
             [Fact]
             public async Task IfEventHasIdAndType_BothShouldBeWrittenToBody()
             {
-                var @event = new Event("sampleData", "sampleType", "sampleId");
-                var body = await GetResponseBodyAfterEventBeingSent(@event);
+                var body = await GetResponseBodyAfterEventBeingSent(
+                    "sampleData",
+                    "sampleType",
+                    "sampleId");
 
                 body.Should().Be("id:sampleId\nevent:sampleType\ndata:sampleData\n\n");
             }
@@ -84,27 +89,21 @@ namespace ServerSentEvents.Test.Unit
             [Fact]
             public async Task IfEventDataContainsLineFeed_BodyShouldContainMultipleDataLines()
             {
-                var @event = new Event("line1\nline2");
-                var body = await GetResponseBodyAfterEventBeingSent(@event);
-
+                var body = await GetResponseBodyAfterEventBeingSent("line1\nline2");
                 body.Should().Be("data:line1\ndata:line2\n\n");
             }
 
             [Fact]
             public async Task ConsecutiveAndIrrelevantLineFeedsShouldBeIgnored()
             {
-                var @event = new Event("\nline1\n\nline2\n");
-                var body = await GetResponseBodyAfterEventBeingSent(@event);
-
+                var body = await GetResponseBodyAfterEventBeingSent("\nline1\n\nline2\n");
                 body.Should().Be("data:line1\ndata:line2\n\n");
             }
 
             [Fact]
             public async Task IfEventDataContaninsCRLF_CarriageReturnShouldBeIgnored()
             {
-                var @event = new Event("line1\r\nline2");
-                var body = await GetResponseBodyAfterEventBeingSent(@event);
-
+                var body = await GetResponseBodyAfterEventBeingSent("line1\r\nline2");
                 body.Should().Be("data:line1\ndata:line2\n\n");
             }
         }

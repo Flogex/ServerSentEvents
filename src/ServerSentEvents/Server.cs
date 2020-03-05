@@ -32,21 +32,28 @@ namespace ServerSentEvents
                 context.Abort();
         }
 
-        public Task Send(ClientId id, IEvent @event)
+        public Task Send(ClientId clientId, IEvent @event)
         {
-            if (!_clients.TryGetValue(id, out var client))
-                throw new ArgumentException($"Unknown client with id {id}.", nameof(id));
+            if (!_clients.TryGetValue(clientId, out var client))
+            {
+                var message = $"Unknown client with id {clientId}.";
+                throw new ArgumentException(message, nameof(clientId));
+            }
 
             return @event.WriteToStream(client.Response.Body);
         }
 
-        public Task SendEvent(ClientId id, Event @event)
-            => Send(id, @event);
+        public Task SendEvent(
+            ClientId clientId,
+            string data,
+            string? type = null,
+            string? id = null)
+            => Send(clientId, new Event(data, type, id));
 
-        public Task SendComment(ClientId id, string comment)
-            => Send(id, new Comment(comment));
+        public Task SendComment(ClientId clientId, string comment)
+            => Send(clientId, new Comment(comment));
 
-        public Task SendWaitRequest(ClientId id, TimeSpan reconnectionTime)
-            => Send(id, new WaitRequest(reconnectionTime));
+        public Task SendWaitRequest(ClientId clientId, TimeSpan reconnectionTime)
+            => Send(clientId, new WaitRequest(reconnectionTime));
     }
 }
