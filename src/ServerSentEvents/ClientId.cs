@@ -14,6 +14,8 @@ namespace ServerSentEvents
 
         public static ClientId NewClientId() => new ClientId();
 
+        public override string ToString() => _guid.ToString();
+
         public bool Equals(ClientId? other) => other is object && _guid.Equals(other._guid);
 
         public override bool Equals(object? obj) => obj is ClientId other && Equals(other);

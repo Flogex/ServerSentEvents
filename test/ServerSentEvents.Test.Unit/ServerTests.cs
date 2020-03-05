@@ -9,27 +9,31 @@ namespace ServerSentEvents.Test.Unit
 {
     public class ServerTests
     {
-        public class WhenSendingEventToSpecificClient
+        public class Send
         {
-            private readonly Server _sut = new Server();
-
-            private async Task<string> GetResponseBodyAfterEventBeingSent(Event @event)
-            {
-                var context = FakeHttpContext.GetInstance();
-                var clientId = await _sut.AddClient(context);
-
-                await _sut.Send(clientId, @event);
-
-                var body = await context.Response.Body.ReadFromStart();
-                return body;
-            }
-
             [Fact]
             public void IfClientDoesNotExist_ShouldThrowArgumentException()
             {
+                var sut = new Server();
                 var nonExistentId = ClientId.NewClientId();
-                _sut.Invoking(x => x.SendEvent(nonExistentId, default))
+
+                sut.Invoking(x => x.Send(nonExistentId, default))
                    .Should().Throw<ArgumentException>();
+            }
+        }
+
+        public class SendEvent
+        {
+            private async Task<string> GetResponseBodyAfterEventBeingSent(Event @event)
+            {
+                var sut = new Server();
+                var context = FakeHttpContext.GetInstance();
+                var clientId = await sut.AddClient(context);
+
+                await sut.Send(clientId, @event);
+
+                var body = await context.Response.Body.ReadFromStart();
+                return body;
             }
 
             [Fact]
@@ -47,7 +51,7 @@ namespace ServerSentEvents.Test.Unit
                 var @event = new Event("sampleData", type: "sampleType");
                 var body = await GetResponseBodyAfterEventBeingSent(@event);
 
-                body.Should().Be("event:sampleType\ndata:sampleData\n\n");
+                body.Should().Contain("event:sampleType\n");
             }
 
             [Fact]
@@ -105,7 +109,7 @@ namespace ServerSentEvents.Test.Unit
             }
         }
 
-        public class WhenSendingCommentToSpecificClient
+        public class SendComment
         {
             private async Task<string> GetResponseBodyAfterCommentBeingSent(string comment)
             {
@@ -139,9 +143,23 @@ namespace ServerSentEvents.Test.Unit
                 var body = await GetResponseBodyAfterCommentBeingSent("line1\nline2");
                 body.Should().Be(":line1\n:line2\n\n");
             }
+
+            [Fact]
+            public async Task ConsecutiveAndIrrelevantLineFeedsShouldBeIgnored()
+            {
+                var body = await GetResponseBodyAfterCommentBeingSent("\nline1\n\nline2\n");
+                body.Should().Be(":line1\n:line2\n\n");
+            }
+
+            [Fact]
+            public async Task IfCommentContaninsCRLF_CarriageReturnShouldBeIgnored()
+            {
+                var body = await GetResponseBodyAfterCommentBeingSent("line1\r\nline2");
+                body.Should().Be(":line1\n:line2\n\n");
+            }
         }
 
-        public class WhenSendingWaitRequest
+        public class SendWaitRequest
         {
             [Fact]
             public async Task BodyShouldContainRetryFieldWithReconnectionTime()
