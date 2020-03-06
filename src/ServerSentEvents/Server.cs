@@ -6,20 +6,20 @@ namespace ServerSentEvents
 {
     public class Server
     {
-        public Task Send(Client client, IEvent @event)
-            => @event.WriteToStream(client.HttpContext.Response.Body);
+        public Task Send(HttpClient client, IEvent @event)
+            => @event.WriteToStream(client.Stream);
 
         public Task SendEvent(
-            Client client,
+            HttpClient client,
             string data,
             string? type = null,
             string? id = null)
             => Send(client, new Event(data, type, id));
 
-        public Task SendComment(Client client, string comment)
+        public Task SendComment(HttpClient client, string comment)
             => Send(client, new Comment(comment));
 
-        public Task SendWaitRequest(Client client, TimeSpan reconnectionTime)
+        public Task SendWaitRequest(HttpClient client, TimeSpan reconnectionTime)
             => Send(client, new WaitRequest(reconnectionTime));
     }
 }

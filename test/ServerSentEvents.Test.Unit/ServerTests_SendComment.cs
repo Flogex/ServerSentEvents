@@ -11,7 +11,7 @@ namespace ServerSentEvents.Test.Unit
         {
             var sut = new Server();
             var context = FakeHttpContext.GetInstance();
-            var client = await Client.NewClient(context);
+            var client = await HttpClient.NewClient(context);
 
             await sut.SendComment(client, comment);
 

@@ -6,12 +6,12 @@ using Xunit;
 
 namespace ServerSentEvents.Test.Unit
 {
-    public class ClientTests
+    public class HttpClientTests
     {
         private async Task<HttpResponse> GetHttpResponseOfNewClient()
         {
             var context = FakeHttpContext.GetInstance();
-            var client = await Client.NewClient(context);
+            var client = await HttpClient.NewClient(context);
             return client.HttpContext.Response;
         }
 
