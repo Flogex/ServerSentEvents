@@ -16,7 +16,7 @@ namespace ServerSentEvents
             for (var i = digitsCount - 1; i >= 0; i--)
             {
                 var rest = number % 10;
-                number /= 10; // Rest is truncated
+                number /= 10; // Remainder is truncated
                 bytes[i] = (byte)(rest + 48);
             }
 
