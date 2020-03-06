@@ -1,29 +1,36 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace ServerSentEvents
 {
-    public class Client : IEquatable<Client>
+    public partial class Client : IEquatable<Client>
     {
-        private Client()
+        private readonly Guid _id = Guid.NewGuid();
+
+        private Client(HttpContext httpContext)
         {
-            Id = Guid.NewGuid();
+            HttpContext = httpContext;
         }
 
-        public Guid Id { get; }
+        internal HttpContext HttpContext { get; }
 
-        public static Client NewClient() => new Client();
+        public static async Task<Client> NewClient(HttpContext httpContext)
+        {
+            if (httpContext.Response.HasStarted)
+                throw new InvalidOperationException();
 
-        public override string ToString() => Id.ToString();
+            await PrepareHttpResponse(httpContext.Response);
 
-        public bool Equals(Client? other) => other is object && Id.Equals(other.Id);
+            return new Client(httpContext);
+        }
 
-        public override bool Equals(object? obj) => obj is Client other && Equals(other);
-
-        public override int GetHashCode() => HashCode.Combine(Id);
-
-        public static bool operator ==(Client a, Client b) => EqualityComparer<Client>.Default.Equals(a, b);
-
-        public static bool operator !=(Client a, Client b) => !(a == b);
+        private static Task PrepareHttpResponse(HttpResponse response)
+        {
+            response.StatusCode = 200;
+            response.ContentType = "text/event-stream";
+            response.Headers.Add("Cache-Control", "no-cache");
+            return response.StartAsync();
+        }
     }
 }

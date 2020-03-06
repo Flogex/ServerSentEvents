@@ -6,34 +6,33 @@ using Xunit;
 
 namespace ServerSentEvents.Test.Unit
 {
-    public class ServerTests_AddClient
+    public class ClientTests
     {
-        private async Task<HttpResponse> GetHttpResponseOfAddedClient()
+        private async Task<HttpResponse> GetHttpResponseOfNewClient()
         {
             var context = FakeHttpContext.GetInstance();
-            var sut = new Server();
-            await sut.AddClient(context);
-            return context.Response;
+            var client = await Client.NewClient(context);
+            return client.HttpContext.Response;
         }
 
         [Fact]
         public async Task StatusCodeShouldBeOK()
         {
-            var httpResponse = await GetHttpResponseOfAddedClient();
+            var httpResponse = await GetHttpResponseOfNewClient();
             httpResponse.StatusCode.Should().Be(200);
         }
 
         [Fact]
         public async Task ContentTypeShouldBeEventStream()
         {
-            var httpResponse = await GetHttpResponseOfAddedClient();
+            var httpResponse = await GetHttpResponseOfNewClient();
             httpResponse.ContentType.Should().Be("text/event-stream");
         }
 
         [Fact]
         public async Task CacheControlHeaderShouldBeNoCache()
         {
-            var httpResponse = await GetHttpResponseOfAddedClient();
+            var httpResponse = await GetHttpResponseOfNewClient();
             var cachingHeaders = httpResponse.Headers["Cache-Control"];
             cachingHeaders.Should().HaveCount(1).And.Contain("no-cache");
         }

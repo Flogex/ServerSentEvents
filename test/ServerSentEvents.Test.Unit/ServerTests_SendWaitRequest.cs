@@ -13,9 +13,9 @@ namespace ServerSentEvents.Test.Unit
         {
             var sut = new Server();
             var context = FakeHttpContext.GetInstance();
-            var clientId = await sut.AddClient(context);
+            var client = await Client.NewClient(context);
 
-            await sut.SendWaitRequest(clientId, TimeSpan.FromMilliseconds(1000));
+            await sut.SendWaitRequest(client, TimeSpan.FromMilliseconds(1000));
 
             var body = await context.Response.Body.ReadFromStart();
             body.Should().Be("retry:1000\n\n");
