@@ -8,52 +8,56 @@ namespace ServerSentEvents
 {
     public class Server
     {
-        private readonly Dictionary<ClientId, HttpContext> _clients = new Dictionary<ClientId, HttpContext>();
+        private readonly Dictionary<Client, HttpContext> _clients = new Dictionary<Client, HttpContext>();
 
-        public async Task<ClientId> AddClient(HttpContext context)
+        public async Task<Client> AddClient(HttpContext context)
         {
-            var id = ClientId.NewClientId();
-            _clients.Add(id, context);
+            var client = Client.NewClient();
+            _clients.Add(client, context);
 
-            context.RequestAborted.Register(state => RemoveClient((ClientId)state!), id);
+            context.RequestAborted.Register(state => RemoveClient((Client)state!), client);
 
-            var response = context.Response;
+            await PrepareHttpResponse(context.Response);
+
+            return client;
+        }
+
+        private static async Task PrepareHttpResponse(HttpResponse response)
+        {
             response.StatusCode = 200;
             response.ContentType = "text/event-stream";
             response.Headers.Add("Cache-Control", "no-cache");
             await response.StartAsync();
-
-            return id;
         }
 
-        public void RemoveClient(ClientId id)
+        public void RemoveClient(Client client)
         {
-            if (_clients.Remove(id, out var context))
+            if (_clients.Remove(client, out var context))
                 context.Abort();
         }
 
-        public Task Send(ClientId clientId, IEvent @event)
+        public Task Send(Client client, IEvent @event)
         {
-            if (!_clients.TryGetValue(clientId, out var client))
+            if (!_clients.TryGetValue(client, out var context))
             {
-                var message = $"Unknown client with id {clientId}.";
-                throw new ArgumentException(message, nameof(clientId));
+                var message = $"Unknown client with id { client.Id }.";
+                throw new ArgumentException(message, nameof(client));
             }
 
-            return @event.WriteToStream(client.Response.Body);
+            return @event.WriteToStream(context.Response.Body);
         }
 
         public Task SendEvent(
-            ClientId clientId,
+            Client client,
             string data,
             string? type = null,
             string? id = null)
-            => Send(clientId, new Event(data, type, id));
+            => Send(client, new Event(data, type, id));
 
-        public Task SendComment(ClientId clientId, string comment)
-            => Send(clientId, new Comment(comment));
+        public Task SendComment(Client client, string comment)
+            => Send(client, new Comment(comment));
 
-        public Task SendWaitRequest(ClientId clientId, TimeSpan reconnectionTime)
-            => Send(clientId, new WaitRequest(reconnectionTime));
+        public Task SendWaitRequest(Client client, TimeSpan reconnectionTime)
+            => Send(client, new WaitRequest(reconnectionTime));
     }
 }

@@ -20,7 +20,7 @@ namespace ServerSentEvents.Test.Unit
 
             _sut.Invoking(s => s.Send(clientId, new FakeEvent()))
                .Should().Throw<ArgumentException>()
-                        .Where(e => e.ParamName == "clientId");
+                        .Where(e => e.ParamName == "client");
         }
 
         [Fact]
@@ -49,7 +49,7 @@ namespace ServerSentEvents.Test.Unit
             // Trying to send event should fail
             sut.Invoking(s => s.Send(clientId, new FakeEvent()))
                .Should().Throw<ArgumentException>()
-                        .Where(e => e.ParamName == "clientId");
+                        .Where(e => e.ParamName == "client");
         }
     }
 }

@@ -11,9 +11,9 @@ namespace ServerSentEvents.Test.Unit
         public void IfClientDoesNotExist_ShouldThrowArgumentException()
         {
             var sut = new Server();
-            var nonExistentId = ClientId.NewClientId();
+            var nonExistentClient = Client.NewClient();
 
-            sut.Invoking(x => x.Send(nonExistentId, new FakeEvent()))
+            sut.Invoking(x => x.Send(nonExistentClient, new FakeEvent()))
                .Should().Throw<ArgumentException>();
         }
     }
