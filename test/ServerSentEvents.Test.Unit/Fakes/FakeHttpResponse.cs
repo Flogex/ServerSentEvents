@@ -25,7 +25,8 @@ namespace ServerSentEvents.Test.Unit.Fakes
         public override IResponseCookies Cookies => throw new NotImplementedException();
         public override bool HasStarted => _hasStarted;
         public override IHeaderDictionary Headers { get; }
-        public override HttpContext HttpContext => throw new NotImplementedException();
+        public FakeHttpContext OverridableHttpContext { get; set; }
+        public override HttpContext HttpContext => OverridableHttpContext;
         public override int StatusCode { get; set; }
 
         public override Task CompleteAsync() => base.CompleteAsync();
