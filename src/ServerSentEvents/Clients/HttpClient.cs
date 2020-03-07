@@ -16,7 +16,6 @@ namespace ServerSentEvents
             var headers = httpContext.Request?.Headers;
             if (headers?.TryGetValue("Last-Event-Id", out var lastEventId) == true)
                 LastEventId = lastEventId;
-
         }
 
         internal HttpContext HttpContext { get; }
@@ -30,7 +29,7 @@ namespace ServerSentEvents
             if (httpContext.Response.HasStarted)
                 throw new InvalidOperationException("Response has already started.");
 
-            await PrepareHttpResponse(httpContext.Response);
+            await PrepareHttpResponse(httpContext.Response).ConfigureAwait(false);
 
             return new HttpClient(httpContext);
         }

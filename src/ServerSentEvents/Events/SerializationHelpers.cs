@@ -29,10 +29,10 @@ namespace ServerSentEvents.Events
                 if (lines[lineFeedIndex - 1] == '\r')
                     charsCount--;
 
-                await stream.WriteAll(label);
+                await stream.WriteAll(label).ConfigureAwait(false);
                 var bytes = Encoding.UTF8.GetBytes(lines, startIndex, charsCount);
-                await stream.WriteAll(bytes);
-                await stream.WriteLineFeed();
+                await stream.WriteAll(bytes).ConfigureAwait(false);
+                await stream.WriteLineFeed().ConfigureAwait(false);
 
                 startIndex = lineFeedIndex + 1;
             }

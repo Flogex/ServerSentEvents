@@ -27,31 +27,31 @@ namespace ServerSentEvents.Events
         public async Task WriteToStream(Stream stream)
         {
             if (Id != null)
-                await WriteEventId(stream, Id);
+                await WriteEventId(stream, Id).ConfigureAwait(false);
 
             if (Type != null)
-                await WriteEventType(stream, Type);
+                await WriteEventType(stream, Type).ConfigureAwait(false);
 
-            await WriteEventData(stream, Data);
-            await stream.WriteLineFeed();
+            await WriteEventData(stream, Data).ConfigureAwait(false);
+            await stream.WriteLineFeed().ConfigureAwait(false);
 
-            await stream.FlushAsync();
+            await stream.FlushAsync().ConfigureAwait(false);
         }
 
         private static async Task WriteEventId(Stream stream, string id)
         {
-            await stream.WriteAll(_idLabel);
+            await stream.WriteAll(_idLabel).ConfigureAwait(false);
             var bytes = Encoding.UTF8.GetBytes(id);
-            await stream.WriteAll(bytes);
-            await stream.WriteLineFeed();
+            await stream.WriteAll(bytes).ConfigureAwait(false);
+            await stream.WriteLineFeed().ConfigureAwait(false);
         }
 
         private static async Task WriteEventType(Stream stream, string type)
         {
-            await stream.WriteAll(_eventLabel);
+            await stream.WriteAll(_eventLabel).ConfigureAwait(false);
             var bytes = Encoding.UTF8.GetBytes(type);
-            await stream.WriteAll(bytes);
-            await stream.WriteLineFeed();
+            await stream.WriteAll(bytes).ConfigureAwait(false);
+            await stream.WriteLineFeed().ConfigureAwait(false);
         }
 
         private static Task WriteEventData(Stream stream, string data)

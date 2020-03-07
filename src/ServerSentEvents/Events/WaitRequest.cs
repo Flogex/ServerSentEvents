@@ -18,15 +18,15 @@ namespace ServerSentEvents.Events
 
         public async Task WriteToStream(Stream stream)
         {
-            await stream.WriteAll(_retryLabel);
+            await stream.WriteAll(_retryLabel).ConfigureAwait(false);
 
             var milliseconds = GetRoundedMilliseconds(ReconnectionTime);
             var bytes = milliseconds.ToByteArray();
 
-            await stream.WriteAll(bytes);
-            await stream.WriteLineFeed();
-            await stream.WriteLineFeed();
-            await stream.FlushAsync();
+            await stream.WriteAll(bytes).ConfigureAwait(false);
+            await stream.WriteLineFeed().ConfigureAwait(false);
+            await stream.WriteLineFeed().ConfigureAwait(false);
+            await stream.FlushAsync().ConfigureAwait(false);
         }
 
         private static int GetRoundedMilliseconds(TimeSpan timeSpan)

@@ -7,8 +7,10 @@ namespace ServerSentEvents.Events
         public static byte[] ToByteArray(this int number)
         {
             if (number < 0)
+            {
                 throw new ArgumentException("Argument must be greater or equal zero",
                                             nameof(number));
+            }
 
             var digitsCount = GetNumberOfDigits(number);
             var bytes = new byte[digitsCount];

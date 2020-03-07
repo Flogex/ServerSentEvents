@@ -17,9 +17,9 @@ namespace ServerSentEvents.Events
 
         public async Task WriteToStream(Stream stream)
         {
-            await stream.WriteLabeledLines(_colon, Value);
-            await stream.WriteLineFeed();
-            await stream.FlushAsync();
+            await stream.WriteLabeledLines(_colon, Value).ConfigureAwait(false);
+            await stream.WriteLineFeed().ConfigureAwait(false);
+            await stream.FlushAsync().ConfigureAwait(false);
         }
     }
 }
