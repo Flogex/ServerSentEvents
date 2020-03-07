@@ -19,7 +19,6 @@ namespace ServerSentEvents.Events
         {
             await stream.WriteLabeledLines(_colon, Value).ConfigureAwait(false);
             await stream.WriteLineFeed().ConfigureAwait(false);
-            await stream.FlushAsync().ConfigureAwait(false);
         }
     }
 }

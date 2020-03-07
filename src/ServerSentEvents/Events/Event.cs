@@ -34,8 +34,6 @@ namespace ServerSentEvents.Events
 
             await WriteEventData(stream, Data).ConfigureAwait(false);
             await stream.WriteLineFeed().ConfigureAwait(false);
-
-            await stream.FlushAsync().ConfigureAwait(false);
         }
 
         private static async Task WriteEventId(Stream stream, string id)

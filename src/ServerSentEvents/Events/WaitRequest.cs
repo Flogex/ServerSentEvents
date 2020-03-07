@@ -26,7 +26,6 @@ namespace ServerSentEvents.Events
             await stream.WriteAll(bytes).ConfigureAwait(false);
             await stream.WriteLineFeed().ConfigureAwait(false);
             await stream.WriteLineFeed().ConfigureAwait(false);
-            await stream.FlushAsync().ConfigureAwait(false);
         }
 
         private static int GetRoundedMilliseconds(TimeSpan timeSpan)

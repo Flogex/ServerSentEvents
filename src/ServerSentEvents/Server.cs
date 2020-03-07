@@ -6,8 +6,12 @@ namespace ServerSentEvents
 {
     public class Server
     {
-        public Task Send(IClient client, IEvent @event)
-            => @event.WriteToStream(client.Stream);
+        public async Task Send(IClient client, IEvent @event)
+        {
+            var stream = client.Stream;
+            await @event.WriteToStream(stream).ConfigureAwait(false);
+            await stream.FlushAsync().ConfigureAwait(false);
+        }
 
         public Task SendEvent(
             IClient client,
