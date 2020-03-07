@@ -12,11 +12,18 @@ namespace ServerSentEvents
         private HttpClient(HttpContext httpContext)
         {
             HttpContext = httpContext;
+
+            var headers = httpContext.Request?.Headers;
+            if (headers?.TryGetValue("Last-Event-Id", out var lastEventId) == true)
+                LastEventId = lastEventId;
+
         }
 
         internal HttpContext HttpContext { get; }
 
         public Stream Stream => HttpContext.Response.Body;
+
+        public string? LastEventId { get; }
 
         public static async Task<HttpClient> NewClient(HttpContext httpContext)
         {

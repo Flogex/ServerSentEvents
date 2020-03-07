@@ -36,5 +36,25 @@ namespace ServerSentEvents.Test.Unit
             var cachingHeaders = response.Headers["Cache-Control"];
             cachingHeaders.Should().HaveCount(1).And.Contain("no-cache");
         }
+
+        [Fact]
+        public async Task IfRequestDoesNotContainLastEventId_LastEventIdPropertyShouldBeNull()
+        {
+            var context = FakeHttpContext.NewHttpContext();
+            var client = await HttpClient.NewClient(context);
+            client.LastEventId.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task IfRequestContainsLastEventId_LastEventIdPropertyShouldBeSetToThisValue()
+        {
+            var request = new FakeHttpRequest();
+            request.Headers.Add("Last-Event-Id", "someId");
+            var context = FakeHttpContext.NewHttpContext(request: request);
+
+            var client = await HttpClient.NewClient(context);
+
+            client.LastEventId.Should().Be("someId");
+        }
     }
 }
