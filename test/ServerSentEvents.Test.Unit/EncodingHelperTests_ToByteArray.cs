@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using ServerSentEvents.Events;
 using Xunit;
 
 namespace ServerSentEvents.Test.Unit

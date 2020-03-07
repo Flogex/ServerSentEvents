@@ -2,7 +2,7 @@
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ServerSentEvents
+namespace ServerSentEvents.Events
 {
     internal static class SerializationHelpers
     {

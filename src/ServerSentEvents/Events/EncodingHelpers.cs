@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ServerSentEvents
+namespace ServerSentEvents.Events
 {
     internal static class EncodingHelpers
     {
