@@ -37,7 +37,7 @@ namespace ServerSentEvents.Test.Unit.Fakes
 
         public override void Abort() => _abortTokenSource.Cancel();
 
-        public static HttpContext GetInstance(
+        public static HttpContext NewHttpContext(
             FakeHttpRequest request = null,
             FakeHttpResponse response = null)
         {

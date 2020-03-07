@@ -10,7 +10,7 @@ namespace ServerSentEvents.Test.Unit
     {
         private async Task<HttpResponse> GetHttpResponseOfNewClient()
         {
-            var context = FakeHttpContext.GetInstance();
+            var context = FakeHttpContext.NewHttpContext();
             var client = await HttpClient.NewClient(context);
             return client.HttpContext.Response;
         }
@@ -18,22 +18,22 @@ namespace ServerSentEvents.Test.Unit
         [Fact]
         public async Task StatusCodeShouldBeOK()
         {
-            var httpResponse = await GetHttpResponseOfNewClient();
-            httpResponse.StatusCode.Should().Be(200);
+            var response = await GetHttpResponseOfNewClient();
+            response.StatusCode.Should().Be(200);
         }
 
         [Fact]
         public async Task ContentTypeShouldBeEventStream()
         {
-            var httpResponse = await GetHttpResponseOfNewClient();
-            httpResponse.ContentType.Should().Be("text/event-stream");
+            var response = await GetHttpResponseOfNewClient();
+            response.ContentType.Should().Be("text/event-stream");
         }
 
         [Fact]
         public async Task CacheControlHeaderShouldBeNoCache()
         {
-            var httpResponse = await GetHttpResponseOfNewClient();
-            var cachingHeaders = httpResponse.Headers["Cache-Control"];
+            var response = await GetHttpResponseOfNewClient();
+            var cachingHeaders = response.Headers["Cache-Control"];
             cachingHeaders.Should().HaveCount(1).And.Contain("no-cache");
         }
     }

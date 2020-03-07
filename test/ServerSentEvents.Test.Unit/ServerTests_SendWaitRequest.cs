@@ -12,7 +12,7 @@ namespace ServerSentEvents.Test.Unit
         public async Task BodyShouldContainRetryFieldWithReconnectionTime()
         {
             var sut = new Server();
-            var context = FakeHttpContext.GetInstance();
+            var context = FakeHttpContext.NewHttpContext();
             var client = await HttpClient.NewClient(context);
 
             await sut.SendWaitRequest(client, TimeSpan.FromMilliseconds(1000));

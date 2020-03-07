@@ -10,7 +10,7 @@ namespace ServerSentEvents.Test.Unit
         private async Task<string> GetResponseBodyAfterCommentBeingSent(string comment)
         {
             var sut = new Server();
-            var context = FakeHttpContext.GetInstance();
+            var context = FakeHttpContext.NewHttpContext();
             var client = await HttpClient.NewClient(context);
 
             await sut.SendComment(client, comment);
