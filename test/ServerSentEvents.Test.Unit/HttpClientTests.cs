@@ -62,9 +62,8 @@ namespace ServerSentEvents.Test.Unit
         [Fact]
         public async Task IfRequestContainsLastEventId_LastEventIdPropertyShouldBeSetToThisValue()
         {
-            var request = new FakeHttpRequest();
-            request.Headers.Add("Last-Event-Id", "someId");
-            var context = FakeHttpContext.NewHttpContext(request: request);
+            var context = FakeHttpContext.NewHttpContext();
+            context.Request.Headers.Add("Last-Event-Id", "someId");
 
             var client = await HttpClient.NewClient(context);
 

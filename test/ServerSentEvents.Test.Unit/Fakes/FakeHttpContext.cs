@@ -11,12 +11,18 @@ namespace ServerSentEvents.Test.Unit.Fakes
     {
         private readonly CancellationTokenSource _abortTokenSource;
 
-        private FakeHttpContext(FakeHttpRequest request, FakeHttpResponse response)
+        public FakeHttpContext()
         {
-            request.OverridableHttpContext = this;
+            var request = new FakeHttpRequest
+            {
+                OverridableHttpContext = this
+            };
             Request = request;
 
-            response.OverridableHttpContext = this;
+            var response = new FakeHttpResponse
+            {
+                OverridableHttpContext = this
+            };
             Response = response;
 
             _abortTokenSource = new CancellationTokenSource();
@@ -37,13 +43,6 @@ namespace ServerSentEvents.Test.Unit.Fakes
 
         public override void Abort() => _abortTokenSource.Cancel();
 
-        public static HttpContext NewHttpContext(
-            FakeHttpRequest request = null,
-            FakeHttpResponse response = null)
-        {
-            return new FakeHttpContext(
-                request ?? new FakeHttpRequest(),
-                response ?? new FakeHttpResponse());
-        }
+        public static HttpContext NewHttpContext() => new FakeHttpContext();
     }
 }
