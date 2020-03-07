@@ -13,13 +13,11 @@ namespace ServerSentEvents.Test.Unit
             string id = null)
         {
             var sut = new Server();
-            var context = FakeHttpContext.NewHttpContext();
-            var client = await HttpClient.NewClient(context);
+            var client = new FakeClient();
 
             await sut.SendEvent(client, data, type, id);
 
-            var body = await context.Response.Body.ReadFromStart();
-            return body;
+            return await client.ReadStreamFromStart();
         }
 
         [Fact]
