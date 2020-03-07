@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ServerSentEvents.Events
@@ -15,7 +16,9 @@ namespace ServerSentEvents.Events
 
         public string Value { get; }
 
-        public async Task WriteToStream(Stream stream)
+        public async Task WriteToStream(
+            Stream stream,
+            CancellationToken cancellationToken = default)
         {
             await stream.WriteLabeledLines(_colon, Value).ConfigureAwait(false);
             await stream.WriteLineFeed().ConfigureAwait(false);

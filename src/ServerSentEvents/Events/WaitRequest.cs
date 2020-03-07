@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ServerSentEvents.Events
@@ -16,7 +17,9 @@ namespace ServerSentEvents.Events
 
         public TimeSpan ReconnectionTime { get; }
 
-        public async Task WriteToStream(Stream stream)
+        public async Task WriteToStream(
+            Stream stream,
+            CancellationToken cancellationToken = default)
         {
             await stream.WriteAll(_retryLabel).ConfigureAwait(false);
 

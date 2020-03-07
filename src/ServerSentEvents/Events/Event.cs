@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ServerSentEvents.Events
@@ -24,7 +25,7 @@ namespace ServerSentEvents.Events
 
         public string? Id { get; }
 
-        public async Task WriteToStream(Stream stream)
+        public async Task WriteToStream(Stream stream, CancellationToken cancellationToken = default)
         {
             if (Id != null)
                 await WriteEventId(stream, Id).ConfigureAwait(false);
