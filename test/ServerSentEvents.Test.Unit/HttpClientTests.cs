@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using ServerSentEvents.Test.Unit.Fakes;
@@ -8,6 +9,19 @@ namespace ServerSentEvents.Test.Unit
 {
     public class HttpClientTests
     {
+        [Fact]
+        public async Task IfHttpResponseHasAlreadyStarted_ShouldThrowInvalidOperationException()
+        {
+            var context = FakeHttpContext.NewHttpContext();
+            await context.Response.StartAsync();
+
+            Func<Task> createClientAction = async () =>
+                await HttpClient.NewClient(context);
+
+            createClientAction.Should().Throw<InvalidOperationException>()
+                                       .WithMessage("Response has already started.");
+        }
+
         private async Task<HttpResponse> GetHttpResponseOfNewClient()
         {
             var context = FakeHttpContext.NewHttpContext();
