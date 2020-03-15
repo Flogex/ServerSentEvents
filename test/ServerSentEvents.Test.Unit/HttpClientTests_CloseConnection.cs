@@ -1,37 +1,43 @@
 ﻿using System.Threading.Tasks;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using ServerSentEvents.Test.Unit.Fakes;
 using Xunit;
 
 namespace ServerSentEvents.Test.Unit
 {
-    public class HttpClientTests_CloseConnection
+    public class HttpClientTests_CloseConnection : IAsyncLifetime
     {
+        private IClient _sut;
+        private HttpContext _context;
+
+        public async Task InitializeAsync()
+        {
+            _context = FakeHttpContext.NewHttpContext();
+            _sut = await HttpClient.NewClient(_context);
+        }
+
+        public Task DisposeAsync() => Task.CompletedTask;
+
         [Fact]
         public async Task WhenConnectionIsClosed_HttpContextShouldBeAborted()
         {
-            var context = FakeHttpContext.NewHttpContext();
-            var sut = await HttpClient.NewClient(context);
-
-            await sut.CloseConnection();
-
-            context.RequestAborted.IsCancellationRequested.Should().BeTrue();
+            await _sut.CloseConnection();
+            _context.RequestAborted.IsCancellationRequested.Should().BeTrue();
         }
 
         [Fact]
         public async Task WhenConnectionIsClosed_HttpResponseShouldBeCompleted()
         {
-            var context = FakeHttpContext.NewHttpContext();
-            var sut = await HttpClient.NewClient(context);
             var responseCompleted = false;
 
-            context.Response.OnCompleted(() =>
+            _context.Response.OnCompleted(() =>
             {
                 responseCompleted = true;
                 return Task.CompletedTask;
             });
 
-            await sut.CloseConnection();
+            await _sut.CloseConnection();
 
             responseCompleted.Should().BeTrue();
         }
@@ -39,24 +45,23 @@ namespace ServerSentEvents.Test.Unit
         [Fact]
         public async Task WhenConnectionIsClosedByServer_ConnectionClosedEventShouldBeRaised()
         {
-            var sut = await HttpClient.NewClient(FakeHttpContext.NewHttpContext());
-            using var eventMonitor = sut.Monitor();
+            using var eventMonitor = _sut.Monitor();
 
-            await sut.CloseConnection();
+            await _sut.CloseConnection();
 
-            eventMonitor.Should().Raise(nameof(sut.ConnectionClosed)).WithSender(sut);
+            eventMonitor.Should().Raise(nameof(_sut.ConnectionClosed))
+                                 .WithSender(_sut);
         }
 
         [Fact]
-        public async Task WhenConnectionIsClosedByClient_ConnectionClosedEventShouldBeRaised()
+        public void WhenConnectionIsClosedByClient_ConnectionClosedEventShouldBeRaised()
         {
-            var context = FakeHttpContext.NewHttpContext();
-            var sut = await HttpClient.NewClient(context);
-            using var eventMonitor = sut.Monitor();
+            using var eventMonitor = _sut.Monitor();
 
-            context.Abort();
+            _context.Abort();
 
-            eventMonitor.Should().Raise(nameof(sut.ConnectionClosed)).WithSender(sut);
+            eventMonitor.Should().Raise(nameof(_sut.ConnectionClosed))
+                                 .WithSender(_sut);
         }
     }
 }
