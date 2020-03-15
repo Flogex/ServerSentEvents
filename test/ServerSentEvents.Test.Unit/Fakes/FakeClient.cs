@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace ServerSentEvents.Test.Unit.Fakes
@@ -6,6 +7,8 @@ namespace ServerSentEvents.Test.Unit.Fakes
     internal class FakeClient : IClient
     {
         public Stream Stream { get; } = new MemoryStream();
+
+        public event EventHandler ConnectionClosed;
 
         public void CloseConnection() => throw new System.NotImplementedException();
 

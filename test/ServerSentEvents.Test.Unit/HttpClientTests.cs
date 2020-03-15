@@ -71,7 +71,7 @@ namespace ServerSentEvents.Test.Unit
         }
 
         [Fact]
-        public async Task WhenConnectionGetsClosed_HttpContextShouldBeAborted()
+        public async Task WhenConnectionIsClosed_HttpContextShouldBeAborted()
         {
             var context = FakeHttpContext.NewHttpContext();
             var client = await HttpClient.NewClient(context);
@@ -79,6 +79,29 @@ namespace ServerSentEvents.Test.Unit
             client.CloseConnection();
 
             context.RequestAborted.IsCancellationRequested.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task WhenConnectionIsClosedByServer_ConnectionClosedEventShouldBeRaised()
+        {
+            var client = await HttpClient.NewClient(FakeHttpContext.NewHttpContext());
+            using var eventMonitor = client.Monitor();
+
+            client.CloseConnection();
+
+            eventMonitor.Should().Raise(nameof(client.ConnectionClosed)).WithSender(client);
+        }
+
+        [Fact]
+        public async Task WhenConnectionIsClosedByClient_ConnectionClosedEventShouldBeRaised()
+        {
+            var context = FakeHttpContext.NewHttpContext();
+            var client = await HttpClient.NewClient(context);
+            using var eventMonitor = client.Monitor();
+
+            context.Abort();
+
+            eventMonitor.Should().Raise(nameof(client.ConnectionClosed)).WithSender(client);
         }
     }
 }

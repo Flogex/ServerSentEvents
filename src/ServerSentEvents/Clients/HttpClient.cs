@@ -16,6 +16,8 @@ namespace ServerSentEvents
             var headers = httpContext.Request?.Headers;
             if (headers?.TryGetValue("Last-Event-Id", out var lastEventId) == true)
                 LastEventId = lastEventId;
+
+            httpContext.RequestAborted.Register(OnConnectionClosed);
         }
 
         internal HttpContext HttpContext { get; }
@@ -24,6 +26,13 @@ namespace ServerSentEvents
 
         public string? LastEventId { get; }
 
+        public event EventHandler? ConnectionClosed;
+
+        private void OnConnectionClosed()
+            => ConnectionClosed?.Invoke(this, EventArgs.Empty);
+
+        // OnConnectionClosed called because we registered method
+        // on RequestAborted CancellationToken
         public void CloseConnection() => HttpContext.Abort();
 
         public static async Task<HttpClient> NewClient(HttpContext httpContext)

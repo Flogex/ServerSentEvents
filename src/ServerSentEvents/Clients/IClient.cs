@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace ServerSentEvents
 {
@@ -6,5 +7,6 @@ namespace ServerSentEvents
     {
         Stream Stream { get; }
         void CloseConnection();
+        event EventHandler? ConnectionClosed;
     }
 }
