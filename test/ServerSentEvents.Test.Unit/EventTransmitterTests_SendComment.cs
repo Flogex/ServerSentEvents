@@ -5,11 +5,11 @@ using Xunit;
 
 namespace ServerSentEvents.Test.Unit
 {
-    public class ServerTests_SendComment
+    public class EventTransmitterTests_SendComment
     {
         private async Task<string> GetResponseBodyAfterCommentBeingSent(string comment)
         {
-            var sut = new Server();
+            var sut = new EventTransmitter();
             var client = new FakeClient();
 
             await sut.SendComment(client, comment);

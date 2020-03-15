@@ -6,12 +6,12 @@ using Xunit;
 
 namespace ServerSentEvents.Test.Unit
 {
-    public class ServerTests_SendWaitRequest
+    public class EventTransmitterTests_SendWaitRequest
     {
         [Fact]
         public async Task BodyShouldContainRetryFieldWithReconnectionTime()
         {
-            var sut = new Server();
+            var sut = new EventTransmitter();
             var client = new FakeClient();
 
             await sut.SendWaitRequest(client, TimeSpan.FromMilliseconds(1000));

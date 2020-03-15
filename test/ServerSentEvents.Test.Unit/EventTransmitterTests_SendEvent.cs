@@ -5,14 +5,14 @@ using Xunit;
 
 namespace ServerSentEvents.Test.Unit
 {
-    public class ServerTests_SendEvent
+    public class EventTransmitterTests_SendEvent
     {
         private async Task<string> GetResponseBodyAfterEventBeingSent(
             string data,
             string type = null,
             string id = null)
         {
-            var sut = new Server();
+            var sut = new EventTransmitter();
             var client = new FakeClient();
 
             await sut.SendEvent(client, data, type, id);

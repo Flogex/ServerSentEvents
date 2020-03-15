@@ -7,7 +7,7 @@ using ServerSentEvents.Events;
 
 namespace ServerSentEvents
 {
-    public class Server
+    public class EventTransmitter
     {
         public async Task Send(
             IClient client,

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using FluentAssertions;
 using ServerSentEvents.Test.Unit.Fakes;
@@ -7,9 +6,9 @@ using Xunit;
 
 namespace ServerSentEvents.Test.Unit
 {
-    public class ServerTests_BroadcastEvent
+    public class EventTransmitterTests_BroadcastEvent
     {
-        private readonly Server _sut = new Server();
+        private readonly EventTransmitter _sut = new EventTransmitter();
         private readonly FakeClient[] _clients = new FakeClient[]
         {
             new FakeClient(),
