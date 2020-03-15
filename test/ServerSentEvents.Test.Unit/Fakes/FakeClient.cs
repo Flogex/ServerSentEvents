@@ -10,7 +10,8 @@ namespace ServerSentEvents.Test.Unit.Fakes
 
         public event EventHandler ConnectionClosed;
 
-        public void CloseConnection() => throw new System.NotImplementedException();
+        public void CloseConnection()
+            => ConnectionClosed?.Invoke(this, EventArgs.Empty);
 
         public async Task<string> ReadStreamFromStart()
         {

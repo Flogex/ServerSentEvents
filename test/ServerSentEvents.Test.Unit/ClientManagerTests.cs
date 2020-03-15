@@ -26,5 +26,16 @@ namespace ServerSentEvents.Test.Unit
 
             _sut.Clients.Should().NotContain(client);
         }
+
+        [Fact]
+        public void WhenClientConnectionIsClosed_ClientShouldBeRemoved()
+        {
+            var client = new FakeClient();
+            _sut.Add(client);
+
+            client.CloseConnection();
+
+            _sut.Clients.Should().NotContain(client);
+        }
     }
 }
