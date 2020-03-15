@@ -24,6 +24,8 @@ namespace ServerSentEvents
 
         public string? LastEventId { get; }
 
+        public void CloseConnection() => HttpContext.Abort();
+
         public static async Task<HttpClient> NewClient(HttpContext httpContext)
         {
             if (httpContext.Response.HasStarted)

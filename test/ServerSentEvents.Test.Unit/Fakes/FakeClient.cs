@@ -7,6 +7,8 @@ namespace ServerSentEvents.Test.Unit.Fakes
     {
         public Stream Stream { get; } = new MemoryStream();
 
+        public void CloseConnection() => throw new System.NotImplementedException();
+
         public async Task<string> ReadStreamFromStart()
         {
             Stream.Seek(0, SeekOrigin.Begin);

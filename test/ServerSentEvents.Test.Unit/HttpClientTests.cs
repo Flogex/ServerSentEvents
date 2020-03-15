@@ -69,5 +69,16 @@ namespace ServerSentEvents.Test.Unit
 
             client.LastEventId.Should().Be("someId");
         }
+
+        [Fact]
+        public async Task WhenConnectionGetsClosed_HttpContextShouldBeAborted()
+        {
+            var context = FakeHttpContext.NewHttpContext();
+            var client = await HttpClient.NewClient(context);
+
+            client.CloseConnection();
+
+            context.RequestAborted.IsCancellationRequested.Should().BeTrue();
+        }
     }
 }
