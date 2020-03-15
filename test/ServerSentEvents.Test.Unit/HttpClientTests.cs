@@ -76,9 +76,27 @@ namespace ServerSentEvents.Test.Unit
             var context = FakeHttpContext.NewHttpContext();
             var client = await HttpClient.NewClient(context);
 
-            client.CloseConnection();
+            await client.CloseConnection();
 
             context.RequestAborted.IsCancellationRequested.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task WhenConnectionIsClosed_HttpResponseIsCompleted()
+        {
+            var responseCompleted = false;
+            var context = FakeHttpContext.NewHttpContext();
+            var client = await HttpClient.NewClient(context);
+
+            context.Response.OnCompleted(() =>
+            {
+                responseCompleted = true;
+                return Task.CompletedTask;
+            });
+
+            await client.CloseConnection();
+
+            responseCompleted.Should().BeTrue();
         }
 
         [Fact]
@@ -87,7 +105,7 @@ namespace ServerSentEvents.Test.Unit
             var client = await HttpClient.NewClient(FakeHttpContext.NewHttpContext());
             using var eventMonitor = client.Monitor();
 
-            client.CloseConnection();
+            await client.CloseConnection();
 
             eventMonitor.Should().Raise(nameof(client.ConnectionClosed)).WithSender(client);
         }

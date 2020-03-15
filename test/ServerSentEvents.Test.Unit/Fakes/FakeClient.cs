@@ -10,8 +10,11 @@ namespace ServerSentEvents.Test.Unit.Fakes
 
         public event EventHandler ConnectionClosed;
 
-        public void CloseConnection()
-            => ConnectionClosed?.Invoke(this, EventArgs.Empty);
+        public Task CloseConnection()
+        {
+            ConnectionClosed?.Invoke(this, EventArgs.Empty);
+            return Task.CompletedTask;
+        }
 
         public async Task<string> ReadStreamFromStart()
         {

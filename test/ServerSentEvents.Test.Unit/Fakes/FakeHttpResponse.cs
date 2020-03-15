@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipelines;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -10,6 +12,7 @@ namespace ServerSentEvents.Test.Unit.Fakes
     internal class FakeHttpResponse : HttpResponse
     {
         private bool _hasStarted;
+        private readonly List<Func<Task>> _onCompletedFuncs = new List<Func<Task>>();
 
         public FakeHttpResponse()
         {
@@ -29,8 +32,10 @@ namespace ServerSentEvents.Test.Unit.Fakes
         public override HttpContext HttpContext => OverridableHttpContext;
         public override int StatusCode { get; set; }
 
-        public override Task CompleteAsync() => base.CompleteAsync();
-        public override void OnCompleted(Func<Task> callback) => base.OnCompleted(callback);
+        public override Task CompleteAsync()
+            => Task.WhenAll(_onCompletedFuncs.Select(func => func()));
+
+        public override void OnCompleted(Func<Task> callback) => _onCompletedFuncs.Add(callback);
         public override void OnCompleted(Func<object, Task> callback, object state) => throw new NotImplementedException();
         public override void OnStarting(Func<Task> callback) => base.OnStarting(callback);
         public override void OnStarting(Func<object, Task> callback, object state) => throw new NotImplementedException();
