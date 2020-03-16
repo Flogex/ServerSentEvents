@@ -8,7 +8,7 @@ namespace ServerSentEvents
     {
         private readonly List<IClient> _clients = new List<IClient>();
 
-        public IReadOnlyCollection<IClient> Clients
+        public IReadOnlyCollection<IClient> GetAll()
             => new ReadOnlyCollection<IClient>(_clients);
 
         public void Add(IClient client)

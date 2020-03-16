@@ -13,7 +13,7 @@ namespace ServerSentEvents.Test.Unit
         {
             var client = new FakeClient();
             _sut.Add(client);
-            _sut.Clients.Should().HaveCount(1).And.Contain(client);
+            _sut.GetAll().Should().HaveCount(1).And.Contain(client);
         }
 
         [Fact]
@@ -24,7 +24,7 @@ namespace ServerSentEvents.Test.Unit
 
             _sut.Remove(client);
 
-            _sut.Clients.Should().NotContain(client);
+            _sut.GetAll().Should().NotContain(client);
         }
 
         [Fact]
@@ -35,7 +35,7 @@ namespace ServerSentEvents.Test.Unit
 
             client.CloseConnection();
 
-            _sut.Clients.Should().NotContain(client);
+            _sut.GetAll().Should().NotContain(client);
         }
     }
 }
