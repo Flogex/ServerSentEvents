@@ -4,16 +4,16 @@ using Xunit;
 
 namespace ServerSentEvents.Test.Unit
 {
-    public class EventTransmitterTests_Clients
+    public class ClientManagerTests
     {
-        private readonly EventTransmitter _sut = new EventTransmitter();
+        private readonly ClientManager _sut = new EventTransmitter().Clients;
 
         [Fact]
         public void AddClient_ClientShouldBeAddedToManager()
         {
             var client = new FakeClient();
-            _sut.Clients.Add(client);
-            _sut.Clients.GetAll().Should().HaveCount(1).And.Contain(client);
+            _sut.Add(client);
+            _sut.GetAll().Should().HaveCount(1).And.Contain(client);
         }
 
         [Fact]
@@ -25,31 +25,31 @@ namespace ServerSentEvents.Test.Unit
                 new FakeClient()
             };
 
-            _sut.Clients.AddRange(clients);
+            _sut.AddRange(clients);
 
-            _sut.Clients.GetAll().Should().Contain(clients);
+            _sut.GetAll().Should().Contain(clients);
         }
 
         [Fact]
         public void RemoveClient_ClientShouldBeRemovedFromManager()
         {
             var client = new FakeClient();
-            _sut.Clients.Add(client);
+            _sut.Add(client);
 
-            _sut.Clients.Remove(client);
+            _sut.Remove(client);
 
-            _sut.Clients.GetAll().Should().NotContain(client);
+            _sut.GetAll().Should().NotContain(client);
         }
 
         [Fact]
         public void WhenClientConnectionIsClosed_ClientShouldBeRemoved()
         {
             var client = new FakeClient();
-            _sut.Clients.Add(client);
+            _sut.Add(client);
 
             client.CloseConnection();
 
-            _sut.Clients.GetAll().Should().NotContain(client);
+            _sut.GetAll().Should().NotContain(client);
         }
     }
 }
