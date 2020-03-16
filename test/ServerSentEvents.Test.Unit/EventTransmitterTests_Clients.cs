@@ -17,6 +17,20 @@ namespace ServerSentEvents.Test.Unit
         }
 
         [Fact]
+        public void AddClientRange_AllClientsShouldBeAddedToManager()
+        {
+            var clients = new FakeClient[]
+            {
+                new FakeClient(),
+                new FakeClient()
+            };
+
+            _sut.Clients.AddRange(clients);
+
+            _sut.Clients.GetAll().Should().Contain(clients);
+        }
+
+        [Fact]
         public void RemoveClient_ClientShouldBeRemovedFromManager()
         {
             var client = new FakeClient();

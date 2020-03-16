@@ -17,6 +17,12 @@ namespace ServerSentEvents
             _clients.Add(client);
         }
 
+        public void AddRange(IEnumerable<IClient> clients)
+        {
+            foreach (var client in clients)
+                Add(client);
+        }
+
         private void HandleClientConnectionClosed(object? sender, EventArgs e)
         {
             if (sender is IClient client)
