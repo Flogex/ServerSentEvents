@@ -9,6 +9,8 @@ namespace ServerSentEvents
 {
     public class EventTransmitter
     {
+        public ClientManager Clients { get; } = new ClientManager();
+
         public async Task Send(
             IClient client,
             IEvent @event,
