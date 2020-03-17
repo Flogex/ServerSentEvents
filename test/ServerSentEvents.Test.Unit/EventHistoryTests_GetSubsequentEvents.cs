@@ -72,9 +72,9 @@ namespace ServerSentEvents.Test.Unit
                 new Event("_", id: null),
                 new Event("_", id: null));
 
-            var newerEvents = _sut.GetSubsequentEvents("someId");
+            var moreRecentEvents = _sut.GetSubsequentEvents("someId");
 
-            newerEvents.Should().BeEmpty();
+            moreRecentEvents.Should().BeEmpty();
         }
 
         [Fact]
@@ -87,9 +87,9 @@ namespace ServerSentEvents.Test.Unit
 
             AddEventsInOrder(first, second, third, fourth);
 
-            var newerEvents = _sut.GetSubsequentEvents(third.Id);
+            var moreRecentEvents = _sut.GetSubsequentEvents(third.Id);
 
-            newerEvents.Should().NotContain(new[] { first, second, third });
+            moreRecentEvents.Should().NotContain(new[] { first, second, third });
         }
 
         [Fact]
@@ -102,10 +102,37 @@ namespace ServerSentEvents.Test.Unit
 
             AddEventsInOrder(first, second, third, fourth);
 
-            var newerEvents = _sut.GetSubsequentEvents("1");
+            var moreRecentEvents = _sut.GetSubsequentEvents("1");
 
-            newerEvents.Should().NotContain(second)
-                       .And.Contain(fourth);
+            moreRecentEvents.Should().NotContain(second)
+                            .And.Contain(fourth);
+        }
+
+        [Fact]
+        public void IfNumberOfStoredEventsExceedsCapacity_EarlierEventsAreRemoved()
+        {
+            var sut = new EventHistory(1);
+
+            sut.Add(new Event("_", id: "1"));
+            sut.Add(new Event("_", id: "2"));
+
+            var moreRecentEvents = sut.GetSubsequentEvents("1");
+
+            moreRecentEvents.Should().BeEmpty("no event with id 1 can be found");
+        }
+
+        [Fact]
+        public void IfNumberOfStoredEventsExceedsCapacity_OtherEventsCanStillBeRetrieved()
+        {
+            var sut = new EventHistory(2);
+
+            sut.Add(new Event("_", id: "1"));
+            sut.Add(new Event("_", id: "2"));
+            sut.Add(new Event("_", id: "3"));
+
+            var moreRecentEvents = sut.GetSubsequentEvents("2");
+
+            moreRecentEvents.Should().ContainSingle(e => e.Id == "3");
         }
     }
 }

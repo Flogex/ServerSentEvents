@@ -7,10 +7,29 @@ namespace ServerSentEvents
 {
     internal class EventHistory
     {
+        private readonly int _capacity;
         // Most recent events at start of list
         private readonly LinkedList<Event> _events = new LinkedList<Event>();
 
-        public void Add(Event @event) => _events.AddFirst(@event);
+        public EventHistory(int capacity = 50)
+        {
+            if (capacity <= 0)
+            {
+                throw new ArgumentException(
+                    "Capacity must be greater zero",
+                    nameof(capacity));
+            }
+
+            _capacity = capacity;
+        }
+
+        public void Add(Event @event)
+        {
+            if (_events.Count == _capacity)
+                _events.RemoveLast();
+
+            _events.AddFirst(@event);
+        }
 
         public IEnumerable<Event> GetSubsequentEvents(string eventId)
         {
