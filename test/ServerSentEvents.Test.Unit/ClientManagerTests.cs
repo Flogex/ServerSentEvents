@@ -17,6 +17,18 @@ namespace ServerSentEvents.Test.Unit
         }
 
         [Fact]
+        public void AddClient_ClientAddedEventShouldBeRaised()
+        {
+            var client = new FakeClient();
+            ClientAddedEventArgs eventArgs = null;
+            _sut.ClientAdded += (sender, args) => eventArgs = args;
+
+            _sut.Add(client);
+
+            eventArgs.NewClient.Should().Be(client);
+        }
+
+        [Fact]
         public void AddClientRange_AllClientsShouldBeAddedToManager()
         {
             var clients = new FakeClient[]

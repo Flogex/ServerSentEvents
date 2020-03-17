@@ -8,13 +8,17 @@ namespace ServerSentEvents
     {
         private readonly List<IClient> _clients = new List<IClient>();
 
-        public IReadOnlyCollection<IClient> GetAll()
+        internal event EventHandler<ClientAddedEventArgs>? ClientAdded;
+
+        public IReadOnlyList<IClient> GetAll()
             => new ReadOnlyCollection<IClient>(_clients);
 
         public void Add(IClient client)
         {
             client.ConnectionClosed += HandleClientConnectionClosed;
             _clients.Add(client);
+
+            ClientAdded?.Invoke(this, new ClientAddedEventArgs(client));
         }
 
         public void AddRange(IEnumerable<IClient> clients)
