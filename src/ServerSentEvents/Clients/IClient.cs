@@ -8,6 +8,8 @@ namespace ServerSentEvents
     {
         Stream Stream { get; }
 
+        string? LastEventId { get; }
+
         Task CloseConnection();
 
         event EventHandler? ConnectionClosed;

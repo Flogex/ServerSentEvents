@@ -8,7 +8,36 @@ namespace ServerSentEvents
 {
     public class EventTransmitter
     {
+        private EventHistory? _eventHistory;
+
         public ClientManager Clients { get; } = new ClientManager();
+
+        public void EnableResend(int maxStoredEvents)
+        {
+            _eventHistory = new EventHistory(maxStoredEvents);
+            Clients.ClientAdded += ResendEvents;
+        }
+
+        public void DisableResend()
+        {
+            _eventHistory?.Clear();
+            _eventHistory = null;
+            Clients.ClientAdded -= ResendEvents;
+        }
+
+        private async void ResendEvents(object? sender, ClientAddedEventArgs args)
+        {
+            var client = args.NewClient;
+            var eventId = client.LastEventId;
+
+            if (eventId != null)
+            {
+                var eventsToResend = _eventHistory!.GetSubsequentEvents(eventId);
+
+                foreach (var @event in eventsToResend)
+                    await Send(client, @event);
+            }
+        }
 
         public async Task Send(
             IClient client,
@@ -54,7 +83,11 @@ namespace ServerSentEvents
             string? type = null,
             string? id = null,
             CancellationToken cancellationToken = default)
-            => Broadcast(new Event(data, type, id), cancellationToken);
+        {
+            var @event = new Event(data, type, id);
+            _eventHistory?.Add(@event);
+            return Broadcast(@event, cancellationToken);
+        }
 
         public Task BroadcastComment(
             string comment,

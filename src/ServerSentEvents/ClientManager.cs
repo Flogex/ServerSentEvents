@@ -27,7 +27,7 @@ namespace ServerSentEvents
                 Add(client);
         }
 
-        private void HandleClientConnectionClosed(object? sender, EventArgs e)
+        private void HandleClientConnectionClosed(object? sender, EventArgs _)
         {
             if (sender is IClient client)
                 Remove(client);

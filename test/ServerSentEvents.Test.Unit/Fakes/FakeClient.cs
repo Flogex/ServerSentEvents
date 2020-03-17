@@ -8,6 +8,8 @@ namespace ServerSentEvents.Test.Unit.Fakes
     {
         public Stream Stream { get; } = new MemoryStream();
 
+        public string LastEventId { get; set; }
+
         public event EventHandler ConnectionClosed;
 
         public Task CloseConnection()
