@@ -35,7 +35,7 @@ namespace ServerSentEvents
         {
             var eventIndex = _events.Find(e => e.Id == eventId);
             // Takes zero elements if eventIndex == -1
-            return _events.Take(eventIndex);
+            return _events.Take(eventIndex).Reverse();
         }
     }
 

@@ -49,8 +49,8 @@ namespace ServerSentEvents.Test.Unit
 
             var moreRecentEvents = _sut.GetSubsequentEvents(first.Id);
 
-            moreRecentEvents.Should().BeEquivalentTo(second, third,
-                fourth);
+            moreRecentEvents.Should().HaveCount(3)
+                            .And.ContainInOrder(second, third, fourth);
         }
 
         [Fact]
