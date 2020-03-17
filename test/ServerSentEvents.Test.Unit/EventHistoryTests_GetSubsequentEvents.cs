@@ -109,6 +109,18 @@ namespace ServerSentEvents.Test.Unit
         }
 
         [Fact]
+        public void WhenClearIsCalled_GetSubsequentEventsShouldReturnEmptyCollection()
+        {
+            _sut.Add(new Event("_", id: "1"));
+            _sut.Add(new Event("_", id: "2"));
+
+            _sut.Clear();
+
+            var events = _sut.GetSubsequentEvents("1");
+            events.Should().BeEmpty();
+        }
+
+        [Fact]
         public void IfNumberOfStoredEventsExceedsCapacity_EarlierEventsAreRemoved()
         {
             var sut = new EventHistory(1);

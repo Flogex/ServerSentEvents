@@ -37,6 +37,8 @@ namespace ServerSentEvents
             // Takes zero elements if eventIndex == -1
             return _events.Take(eventIndex).Reverse();
         }
+
+        public void Clear() => _events.Clear();
     }
 
     internal static class LinkedListExtensions
