@@ -8,6 +8,7 @@ namespace ServerSentEvents
 {
     public class EventTransmitter
     {
+        private bool _resendEvents;
         private EventHistory? _eventHistory;
 
         public ClientManager Clients { get; } = new ClientManager();
@@ -16,10 +17,12 @@ namespace ServerSentEvents
         {
             _eventHistory = new EventHistory(maxStoredEvents);
             Clients.ClientAdded += ResendEvents;
+            _resendEvents = true;
         }
 
         public void DisableResend()
         {
+            _resendEvents = false;
             _eventHistory?.Clear();
             _eventHistory = null;
             Clients.ClientAdded -= ResendEvents;
@@ -45,8 +48,12 @@ namespace ServerSentEvents
             CancellationToken cancellationToken = default)
         {
             var stream = client.Stream;
-            await @event.WriteToStream(stream, cancellationToken).ConfigureAwait(false);
-            await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
+
+            await @event.WriteToStream(stream, cancellationToken)
+                .ConfigureAwait(false);
+
+            await stream.FlushAsync(cancellationToken)
+                .ConfigureAwait(false);
         }
 
         public Task SendEvent(
@@ -85,7 +92,10 @@ namespace ServerSentEvents
             CancellationToken cancellationToken = default)
         {
             var @event = new Event(data, type, id);
-            _eventHistory?.Add(@event);
+
+            if (_resendEvents)
+                _eventHistory?.Add(@event);
+
             return Broadcast(@event, cancellationToken);
         }
 
