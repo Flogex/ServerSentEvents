@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using ServerSentEvents.Test.Unit.Helpers;
 
 namespace ServerSentEvents.Test.Unit.Fakes
 {
@@ -18,12 +19,6 @@ namespace ServerSentEvents.Test.Unit.Fakes
             return Task.CompletedTask;
         }
 
-        public async Task<string> ReadStreamFromStart()
-        {
-            Stream.Seek(0, SeekOrigin.Begin);
-            using var reader = new StreamReader(Stream);
-            var content = await reader.ReadToEndAsync();
-            return content;
-        }
+        public Task<string> ReadStreamFromStart() => Stream.ReadFromStart();
     }
 }
