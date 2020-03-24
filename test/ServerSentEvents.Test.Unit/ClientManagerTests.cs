@@ -10,6 +10,14 @@ namespace ServerSentEvents.Test.Unit
         private readonly ClientManager _sut = new EventTransmitter().Clients;
 
         [Fact]
+        public void AddClient_ClientShouldBeAddedToManager()
+        {
+            var client = new FakeClient();
+            _sut.Add(client);
+            _sut.GetAll().Should().HaveCount(1).And.Contain(client);
+        }
+
+        [Fact]
         public void AddClient_IfClientIsNull_ArgumentNullExceptionShouldBeThrown()
         {
             Action act = () => _sut.Add(null);
@@ -18,11 +26,12 @@ namespace ServerSentEvents.Test.Unit
         }
 
         [Fact]
-        public void AddClient_ClientShouldBeAddedToManager()
+        public void AddClient_IfClientWasAlreadyAdded_ClientShouldBeInManagerOnlyOnce()
         {
             var client = new FakeClient();
             _sut.Add(client);
-            _sut.GetAll().Should().HaveCount(1).And.Contain(client);
+            _sut.Add(client);
+            _sut.GetAll().Should().HaveCount(1);
         }
 
         [Fact]

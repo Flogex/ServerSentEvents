@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 
 namespace ServerSentEvents
 {
     public class ClientManager
     {
-        private readonly List<IClient> _clients = new List<IClient>();
+        private readonly HashSet<IClient> _clients = new HashSet<IClient>();
 
         internal event EventHandler<ClientAddedEventArgs>? ClientAdded;
 
         public IReadOnlyList<IClient> GetAll()
-            => new ReadOnlyCollection<IClient>(_clients);
+            => new ReadOnlyCollection<IClient>(_clients.ToImmutableList());
 
         public void Add(IClient client)
         {
