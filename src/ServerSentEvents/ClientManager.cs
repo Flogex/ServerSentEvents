@@ -15,6 +15,9 @@ namespace ServerSentEvents
 
         public void Add(IClient client)
         {
+            if (client is null)
+                throw new ArgumentNullException(nameof(client));
+
             client.ConnectionClosed += HandleClientConnectionClosed;
             _clients.Add(client);
 

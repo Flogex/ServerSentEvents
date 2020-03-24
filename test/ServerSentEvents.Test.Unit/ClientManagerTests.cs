@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System;
+using FluentAssertions;
 using ServerSentEvents.Test.Unit.Fakes;
 using Xunit;
 
@@ -7,6 +8,14 @@ namespace ServerSentEvents.Test.Unit
     public class ClientManagerTests
     {
         private readonly ClientManager _sut = new EventTransmitter().Clients;
+
+        [Fact]
+        public void AddClient_IfClientIsNull_ArgumentNullExceptionShouldBeThrown()
+        {
+            Action act = () => _sut.Add(null);
+            act.Should().Throw<ArgumentNullException>()
+               .Which.ParamName.Should().Be("client");
+        }
 
         [Fact]
         public void AddClient_ClientShouldBeAddedToManager()

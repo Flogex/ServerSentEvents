@@ -9,9 +9,9 @@ namespace ServerSentEvents.Events
     {
         private static readonly byte[] _colon = new byte[] { 58 };
 
-        public Comment(string value)
+        public Comment(string comment)
         {
-            Value = value ?? throw new ArgumentNullException(nameof(value));
+            Value = comment ?? throw new ArgumentNullException(nameof(comment));
         }
 
         public string Value { get; }

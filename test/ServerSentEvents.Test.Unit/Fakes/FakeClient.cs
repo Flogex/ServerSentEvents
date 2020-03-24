@@ -7,7 +7,7 @@ namespace ServerSentEvents.Test.Unit.Fakes
 {
     internal class FakeClient : IClient
     {
-        public Stream Stream { get; } = new MemoryStream();
+        public Stream Stream { get; set; } = new MemoryStream();
 
         public string LastEventId { get; set; }
 

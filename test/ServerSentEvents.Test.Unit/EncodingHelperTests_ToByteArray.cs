@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System;
+using FluentAssertions;
 using ServerSentEvents.Events;
 using Xunit;
 
@@ -6,6 +7,15 @@ namespace ServerSentEvents.Test.Unit
 {
     public class EncodingHelperTests_ToByteArray
     {
+        [Fact]
+        public void IfNumberIsSmallerZero_ArgumentExceptionShouldBeThrown()
+        {
+            var number = -1;
+            Action act = () => number.ToByteArray();
+            act.Should().Throw<ArgumentException>().WithMessage("*zero*")
+               .And.ParamName.Should().Be("number");
+        }
+
         [Theory]
         [InlineData(0, new byte[] { 48 })]
         [InlineData(1, new byte[] { 49 })]

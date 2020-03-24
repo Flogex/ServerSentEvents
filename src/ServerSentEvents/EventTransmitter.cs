@@ -15,6 +15,13 @@ namespace ServerSentEvents
 
         public void EnableResend(int maxStoredEvents)
         {
+            if (maxStoredEvents <= 0)
+            {
+                throw new ArgumentException(
+                    "maxStoredEvents must be greater than zero",
+                    nameof(maxStoredEvents));
+            }
+
             _eventHistory = new EventHistory(maxStoredEvents);
             Clients.ClientAdded += ResendEvents;
             _resendEvents = true;
@@ -47,6 +54,19 @@ namespace ServerSentEvents
             IEvent @event,
             CancellationToken cancellationToken = default)
         {
+            if (client is null)
+                throw new ArgumentNullException(nameof(client));
+
+            if (client.Stream is null)
+            {
+                throw new ArgumentException(
+                    "client.Stream must not be null.",
+                    nameof(client));
+            }
+
+            if (@event is null)
+                throw new ArgumentNullException(nameof(@event));
+
             var stream = client.Stream;
 
             await @event.WriteToStream(stream, cancellationToken)
@@ -80,6 +100,9 @@ namespace ServerSentEvents
             IEvent @event,
             CancellationToken cancellationToken = default)
         {
+            if (@event is null)
+                throw new ArgumentNullException(nameof(@event));
+
             var clients = Clients.GetAll();
             var tasks = clients.Select(c => Send(c, @event, cancellationToken));
             return Task.WhenAll(tasks);

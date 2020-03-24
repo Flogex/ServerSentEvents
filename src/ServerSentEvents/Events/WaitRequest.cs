@@ -12,6 +12,13 @@ namespace ServerSentEvents.Events
 
         public WaitRequest(TimeSpan reconnectionTime)
         {
+            if (reconnectionTime < TimeSpan.Zero)
+            {
+                throw new ArgumentException(
+                    "reconnectionTime must be greater or equal zero",
+                    nameof(reconnectionTime));
+            }
+
             ReconnectionTime = reconnectionTime;
         }
 
