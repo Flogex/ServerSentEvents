@@ -6,7 +6,7 @@ using ServerSentEvents.Events;
 
 namespace ServerSentEvents
 {
-    public class EventTransmitter
+    public partial class EventTransmitter
     {
         private bool _resendEvents;
         private EventHistory? _eventHistory;

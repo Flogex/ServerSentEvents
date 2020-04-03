@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 
 namespace ServerSentEvents
 {
-    public class ClientManager
+    public partial class ClientManager
     {
         private readonly HashSet<IClient> _clients = new HashSet<IClient>();
 
