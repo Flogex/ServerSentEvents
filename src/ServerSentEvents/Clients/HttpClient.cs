@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace ServerSentEvents
 {
-    public partial class HttpClient : IClient, IEquatable<HttpClient>
+    public partial class HttpClient : IClient
     {
         private readonly Guid _id = Guid.NewGuid();
 

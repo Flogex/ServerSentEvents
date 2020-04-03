@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using FluentAssertions;
 using ServerSentEvents.Test.Unit.Fakes;
 using Xunit;
@@ -7,23 +8,24 @@ namespace ServerSentEvents.Test.Unit
 {
     public class EventTransmitterTests_Resend
     {
-        [Fact]
-        public async Task WhenAddingClientWithKnownLastEventId_AllSubsequentEventsAreSendToClient()
-        {
-            var sut = new EventTransmitter();
-            sut.EnableResend(10);
+        private readonly EventTransmitter _sut = new EventTransmitter();
 
-            await sut.BroadcastEvent("Ignored 1", id: "1");
-            await sut.BroadcastEvent("M2", id: "2");
-            await sut.BroadcastEvent("M3", id: null);
-            await sut.BroadcastEvent("M4", id: "4");
+        [Fact]
+        public async Task WhenAddingClientWithKnownLastEventId_AllSubsequentEventsShouldBeSendToClient()
+        {
+            _sut.EnableResend(10);
+
+            await _sut.BroadcastEvent("Ignored 1", id: "1");
+            await _sut.BroadcastEvent("M2", id: "2");
+            await _sut.BroadcastEvent("M3", id: null);
+            await _sut.BroadcastEvent("M4", id: "4");
 
             var client = new FakeClient()
             {
                 LastEventId = "1"
             };
 
-            sut.Clients.Add(client);
+            _sut.Clients.Add(client);
 
             var body = await client.ReadStreamFromStart();
             body.Should().Be(
@@ -35,18 +37,17 @@ namespace ServerSentEvents.Test.Unit
         [Fact]
         public async Task WhenAddingClientAndResendIsDisabled_NothingShouldBeWrittenToStream()
         {
-            var sut = new EventTransmitter();
-            sut.DisableResend();
+            _sut.DisableResend(); // Just to be sure
 
-            await sut.BroadcastEvent("M1", id: "1");
-            await sut.BroadcastEvent("M2", id: "2");
+            await _sut.BroadcastEvent("M1", id: "1");
+            await _sut.BroadcastEvent("M2", id: "2");
 
             var client = new FakeClient()
             {
                 LastEventId = "1"
             };
 
-            sut.Clients.Add(client);
+            _sut.Clients.Add(client);
 
             var body = await client.ReadStreamFromStart();
             body.Should().BeEmpty();

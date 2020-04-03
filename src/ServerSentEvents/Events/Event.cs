@@ -1,16 +1,16 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Text.Encoding;
 
 namespace ServerSentEvents.Events
 {
     public class Event : IEvent
     {
-        private static readonly byte[] _idLabel = Encoding.UTF8.GetBytes("id:");
-        private static readonly byte[] _eventLabel = Encoding.UTF8.GetBytes("event:");
-        private static readonly byte[] _dataLabel = Encoding.UTF8.GetBytes("data:");
+        private static readonly byte[] _idLabel = UTF8.GetBytes("id:");
+        private static readonly byte[] _eventLabel = UTF8.GetBytes("event:");
+        private static readonly byte[] _dataLabel = UTF8.GetBytes("data:");
 
         public Event(string data, string? type = null, string? id = null)
         {
@@ -25,7 +25,9 @@ namespace ServerSentEvents.Events
 
         public string? Id { get; }
 
-        public async Task WriteToStream(Stream stream, CancellationToken cancellationToken = default)
+        public async Task WriteToStream(
+            Stream stream,
+            CancellationToken cancellationToken = default)
         {
             if (Id != null)
                 await WriteEventId(stream, Id).ConfigureAwait(false);
@@ -40,7 +42,7 @@ namespace ServerSentEvents.Events
         private static async Task WriteEventId(Stream stream, string id)
         {
             await stream.WriteAll(_idLabel).ConfigureAwait(false);
-            var bytes = Encoding.UTF8.GetBytes(id);
+            var bytes = UTF8.GetBytes(id);
             await stream.WriteAll(bytes).ConfigureAwait(false);
             await stream.WriteLineFeed().ConfigureAwait(false);
         }
@@ -48,7 +50,7 @@ namespace ServerSentEvents.Events
         private static async Task WriteEventType(Stream stream, string type)
         {
             await stream.WriteAll(_eventLabel).ConfigureAwait(false);
-            var bytes = Encoding.UTF8.GetBytes(type);
+            var bytes = UTF8.GetBytes(type);
             await stream.WriteAll(bytes).ConfigureAwait(false);
             await stream.WriteLineFeed().ConfigureAwait(false);
         }
