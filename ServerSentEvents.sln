@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerSentEvents.Test.Unit"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestServer", "test\TestServer\TestServer.csproj", "{92A6676D-A34F-4A23-A391-07226A4D52AA}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerSentEvents.Test.Performance", "test\ServerSentEvents.Test.Performance\ServerSentEvents.Test.Performance.csproj", "{397E878F-1278-4E91-A868-48EDDF5E78BC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{92A6676D-A34F-4A23-A391-07226A4D52AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{92A6676D-A34F-4A23-A391-07226A4D52AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{92A6676D-A34F-4A23-A391-07226A4D52AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{397E878F-1278-4E91-A868-48EDDF5E78BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{397E878F-1278-4E91-A868-48EDDF5E78BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{397E878F-1278-4E91-A868-48EDDF5E78BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{397E878F-1278-4E91-A868-48EDDF5E78BC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
