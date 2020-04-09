@@ -15,18 +15,23 @@ namespace ServerSentEvents.Events
             {
                 var lineFeedIndex = lines.IndexOf('\n', startIndex);
 
-                if (lineFeedIndex == startIndex) // Ignore empty lines
+                // Ignore empty lines
+                if (lineFeedIndex == startIndex)
                 {
                     startIndex++;
                     continue;
                 }
 
+                // Write all remaining bytes
                 if (lineFeedIndex == -1)
                     lineFeedIndex = lines.Length;
 
-                var charsCount = lineFeedIndex - startIndex; // Ignore linefeed
+                // Do not count linefeed. It is sent with WriteLineFeed().
+                var charsCount = lineFeedIndex - startIndex;
 
-                if (lines[lineFeedIndex - 1] == '\r')
+                // Ignore carriage returns at the end of a line,
+                // except when it is the only byte sent.
+                if (lines[lineFeedIndex - 1] == '\r' && charsCount > 1)
                     charsCount--;
 
                 await stream.WriteAll(label).ConfigureAwait(false);

@@ -88,5 +88,12 @@ namespace ServerSentEvents.Test.Unit
             var body = await GetResponseBodyAfterEventBeingSent("line1\r\nline2");
             body.Should().Be("data:line1\ndata:line2\n\n");
         }
+
+        [Fact]
+        public async Task IfEventDataIsOnlyCR_BodyShouldBeContainCR()
+        {
+            var body = await GetResponseBodyAfterEventBeingSent("\r");
+            body.Should().Be("data:\r\n\n");
+        }
     }
 }
