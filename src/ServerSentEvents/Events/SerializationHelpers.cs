@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -6,14 +7,19 @@ namespace ServerSentEvents.Events
 {
     internal static class SerializationHelpers
     {
-        private static readonly byte[] _linefeed = new byte[] { 10 };
+        private const byte LF = 10;
+        private const byte CR = 13;
+
+        private static readonly byte[] _linefeed = new byte[] { LF };
 
         public static async Task WriteLabeledLines(this Stream stream, byte[] label, string lines)
         {
+            var bytes = Encoding.UTF8.GetBytes(lines);
             var startIndex = 0;
+
             do
             {
-                var lineFeedIndex = lines.IndexOf('\n', startIndex);
+                var lineFeedIndex = Array.IndexOf(bytes, LF, startIndex);
 
                 // Ignore empty lines
                 if (lineFeedIndex == startIndex)
@@ -24,24 +30,26 @@ namespace ServerSentEvents.Events
 
                 // Write all remaining bytes
                 if (lineFeedIndex == -1)
-                    lineFeedIndex = lines.Length;
+                    lineFeedIndex = bytes.Length;
 
                 // Do not count linefeed. It is sent with WriteLineFeed().
                 var charsCount = lineFeedIndex - startIndex;
 
                 // Ignore carriage returns at the end of a line,
                 // except when it is the only byte sent.
-                if (lines[lineFeedIndex - 1] == '\r' && charsCount > 1)
+                if (bytes[lineFeedIndex - 1] == CR && charsCount > 1)
                     charsCount--;
 
                 await stream.WriteAll(label).ConfigureAwait(false);
-                var bytes = Encoding.UTF8.GetBytes(lines, startIndex, charsCount);
-                await stream.WriteAll(bytes).ConfigureAwait(false);
+
+                await stream.WriteAsync(bytes, startIndex, charsCount)
+                    .ConfigureAwait(false);
+
                 await stream.WriteLineFeed().ConfigureAwait(false);
 
                 startIndex = lineFeedIndex + 1;
             }
-            while (startIndex < lines.Length);
+            while (startIndex < bytes.Length);
         }
 
         public static Task WriteLineFeed(this Stream stream)
