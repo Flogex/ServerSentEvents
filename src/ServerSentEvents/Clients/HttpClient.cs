@@ -31,7 +31,7 @@ namespace ServerSentEvents
         private void OnConnectionClosed()
             => ConnectionClosed?.Invoke(this, EventArgs.Empty);
 
-        // OnConnectionClosed called because we registered this method
+        // OnConnectionClosed gets called because we registered this method
         // on 'HttpContext.RequestAborted' CancellationToken
         public async Task CloseConnection()
         {
@@ -42,7 +42,8 @@ namespace ServerSentEvents
         public static async Task<HttpClient> NewClient(HttpContext httpContext)
         {
             if (httpContext.Response.HasStarted)
-                throw new InvalidOperationException("Response has already started.");
+                throw new ArgumentException("HttpContext.Response has already started.",
+                    nameof(httpContext));
 
             await PrepareHttpResponse(httpContext.Response).ConfigureAwait(false);
 
@@ -54,6 +55,8 @@ namespace ServerSentEvents
             response.StatusCode = 200;
             response.ContentType = "text/event-stream";
             response.Headers.Add("Cache-Control", "no-cache");
+            response.Headers.Add("Transfer-Encoding", "identity");
+            response.Headers.Add("Connection", "keep-alive");
             return response.StartAsync();
         }
     }

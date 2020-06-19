@@ -18,8 +18,8 @@ namespace ServerSentEvents.Test.Unit
             Func<Task> createClientAction = async () =>
                 await HttpClient.NewClient(context);
 
-            createClientAction.Should().Throw<InvalidOperationException>()
-                                       .WithMessage("Response has already started.");
+            createClientAction.Should().Throw<ArgumentException>()
+                                       .WithMessage("*Response * already started*");
         }
 
         private async Task<HttpResponse> GetHttpResponseOfNewClient()
