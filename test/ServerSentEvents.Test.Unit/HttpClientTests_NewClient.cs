@@ -11,7 +11,7 @@ namespace ServerSentEvents.Test.Unit
     public class HttpClientTests_NewClient
     {
         [Fact]
-        public async Task IfHttpResponseHasAlreadyStarted_ShouldThrowInvalidOperationException()
+        public async Task IfHttpResponseHasAlreadyStarted_ShouldThrowArgumentException()
         {
             var context = FakeHttpContext.NewHttpContext();
             await context.Response.StartAsync();
@@ -20,7 +20,8 @@ namespace ServerSentEvents.Test.Unit
                 await HttpClient.NewClient(context);
 
             createClientAction.Should().Throw<ArgumentException>()
-                                       .WithMessage("*Response * already started*");
+                .WithMessage("*Response * already started*",
+                    because: "the header cannot be changed after the response has started");
         }
 
         private async Task<HttpResponse> GetHttpResponseOfNewClient()
