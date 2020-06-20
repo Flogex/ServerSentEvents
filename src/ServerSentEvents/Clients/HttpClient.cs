@@ -60,5 +60,15 @@ namespace ServerSentEvents
             response.Headers.Add("Connection", "keep-alive");
             return response.StartAsync();
         }
+
+        public static Task StopReconnecting(HttpContext context)
+        {
+            var response = context.Response;
+            response.StatusCode = Status204NoContent;
+            response.ContentType = "text/event-stream";
+            response.ContentLength = 0;
+            response.Headers.Add("Connection", "close");
+            return response.CompleteAsync();
+        }
     }
 }
