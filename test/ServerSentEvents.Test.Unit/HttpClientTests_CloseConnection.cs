@@ -29,17 +29,8 @@ namespace ServerSentEvents.Test.Unit
         [Fact]
         public async Task WhenConnectionIsClosed_HttpResponseShouldBeCompleted()
         {
-            var responseCompleted = false;
-
-            _context.Response.OnCompleted(() =>
-            {
-                responseCompleted = true;
-                return Task.CompletedTask;
-            });
-
             await _sut.CloseConnection();
-
-            responseCompleted.Should().BeTrue();
+            ((FakeHttpResponse)_context.Response).HasCompleted.Should().BeTrue();
         }
 
         [Fact]

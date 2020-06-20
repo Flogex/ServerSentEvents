@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
@@ -47,8 +48,23 @@ namespace ServerSentEvents.Test.Unit
         public async Task CacheControlHeaderShouldBeNoCache()
         {
             var response = await GetHttpResponseOfNewClient();
-            var cachingHeaders = response.Headers["Cache-Control"];
-            cachingHeaders.Should().HaveCount(1).And.Contain("no-cache");
+            var cachingHeaders = response.Headers["Cache-Control"].Single();
+            cachingHeaders.Should().Be("no-cache");
+        }
+
+        [Fact]
+        public async Task ConnectionHeaderShouldBeKeepAlive()
+        {
+            var response = await GetHttpResponseOfNewClient();
+            var cachingHeaders = response.Headers["Connection"].Single();
+            cachingHeaders.Should().Be("keep-alive");
+        }
+
+        [Fact]
+        public async Task ResponseShouldBeStarted()
+        {
+            var response = await GetHttpResponseOfNewClient();
+            response.HasStarted.Should().BeTrue();
         }
 
         [Fact]

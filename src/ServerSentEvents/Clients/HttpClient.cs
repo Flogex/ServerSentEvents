@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using static Microsoft.AspNetCore.Http.StatusCodes;
 
 namespace ServerSentEvents
 {
@@ -9,9 +10,9 @@ namespace ServerSentEvents
     {
         private readonly Guid _id = Guid.NewGuid();
 
-        private HttpClient(HttpContext httpContext)
+        private HttpClient(HttpContext context)
         {
-            HttpContext = httpContext;
+            HttpContext = context;
 
             var headers = HttpContext.Request?.Headers;
             if (headers?.TryGetValue("Last-Event-Id", out var lastEventId) == true)
@@ -39,20 +40,20 @@ namespace ServerSentEvents
             HttpContext.Abort();
         }
 
-        public static async Task<HttpClient> NewClient(HttpContext httpContext)
+        public static async Task<HttpClient> NewClient(HttpContext context)
         {
-            if (httpContext.Response.HasStarted)
+            if (context.Response.HasStarted)
                 throw new ArgumentException("HttpContext.Response has already started.",
-                    nameof(httpContext));
+                    nameof(context));
 
-            await PrepareHttpResponse(httpContext.Response).ConfigureAwait(false);
+            await PrepareHttpResponse(context.Response).ConfigureAwait(false);
 
-            return new HttpClient(httpContext);
+            return new HttpClient(context);
         }
 
         private static Task PrepareHttpResponse(HttpResponse response)
         {
-            response.StatusCode = 200;
+            response.StatusCode = Status200OK;
             response.ContentType = "text/event-stream";
             response.Headers.Add("Cache-Control", "no-cache");
             response.Headers.Add("Transfer-Encoding", "identity");
